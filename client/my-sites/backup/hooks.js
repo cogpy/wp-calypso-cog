@@ -57,9 +57,10 @@ export const useFirstMatchingBackupAttempt = (
 	{ before, after, successOnly, sortOrder } = {},
 	queryOptions = {}
 ) => {
-	const hasRealtimeBackups = useSelector( ( state ) =>
-		siteHasFeature( state, siteId, WPCOM_FEATURES_REAL_TIME_BACKUPS )
-	);
+	const hasRealtimeBackups = false;
+	// const hasRealtimeBackups = useSelector( ( state ) =>
+	// 	siteHasFeature( state, siteId, WPCOM_FEATURES_REAL_TIME_BACKUPS )
+	// );
 
 	const filter = hasRealtimeBackups
 		? getRealtimeAttemptFilter( { before, after, sortOrder } )

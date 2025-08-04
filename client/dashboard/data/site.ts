@@ -44,6 +44,7 @@ export const SITE_OPTIONS = [
 	'software_version',
 	'updated_at',
 	'wpcom_production_blog_id',
+	'woocommerce_is_active',
 ];
 
 export const JOINED_SITE_OPTIONS = SITE_OPTIONS.join( ',' );
@@ -78,6 +79,7 @@ export interface SiteOptions {
 	updated_at?: string;
 	wpcom_production_blog_id?: number;
 	wpcom_staging_blog_ids?: number[];
+	woocommerce_is_active?: boolean;
 }
 
 export interface Site {

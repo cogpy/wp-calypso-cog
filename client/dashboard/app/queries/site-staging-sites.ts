@@ -3,8 +3,12 @@ import {
 	createStagingSite,
 	deleteStagingSite,
 	fetchStagingSiteOf,
+	fetchStagingSiteSyncState,
+	pushToStagingSite,
+	pullFromStagingSite,
 } from '../../data/site-staging-site';
 import { queryClient } from '../query-client';
+import type { StagingSiteSyncOptions } from '../../data/site-staging-site';
 
 export const hasStagingSiteQuery = ( productionSiteId: number ) =>
 	queryOptions( {
@@ -31,4 +35,29 @@ export const stagingSiteDeleteMutation = ( stagingSiteId: number, productionSite
 		onSuccess: () => {
 			queryClient.setQueryData( isDeletingStagingSiteQuery( stagingSiteId ).queryKey, true );
 		},
+	} );
+
+export const stagingSiteSyncStateQuery = ( siteId: number ) =>
+	queryOptions( {
+		queryKey: [ 'site', siteId, 'staging-site-sync-state' ],
+		queryFn: () => fetchStagingSiteSyncState( siteId ),
+		select: ( data ) => data.length > 0,
+	} );
+
+export const stagingSitePushToStagingMutation = (
+	productionSiteId: number,
+	stagingSiteId: number
+) =>
+	mutationOptions( {
+		mutationFn: ( options?: StagingSiteSyncOptions ) =>
+			pushToStagingSite( productionSiteId, stagingSiteId, options ),
+	} );
+
+export const stagingSitePullFromStagingMutation = (
+	productionSiteId: number,
+	stagingSiteId: number
+) =>
+	mutationOptions( {
+		mutationFn: ( options?: StagingSiteSyncOptions ) =>
+			pullFromStagingSite( productionSiteId, stagingSiteId, options ),
 	} );

@@ -38,14 +38,14 @@ const FileBrowserNode: FunctionComponent< FileBrowserNodeProps > = ( {
 	siteId,
 } ) => {
 	const isRoot = path === '/';
-	const dispatch = useDispatch();
+	const dispatch = () => {}; // useDispatch();
 	const isCurrentNodeClicked = activeNodePath === path;
 	const showFileCard = fileBrowserConfig?.showFileCard ?? true;
 	const applyFiltering = !! fileBrowserConfig;
 	const [ fetchContentsOnMount, setFetchContentsOnMount ] = useState< boolean >( isRoot );
 	const [ isOpen, setIsOpen ] = useState< boolean >( isRoot );
 	const [ addedAnyChildren, setAddedAnyChildren ] = useState< boolean >( false );
-	const browserNodeItem = useSelector( ( state ) => getBackupBrowserNode( state, siteId, path ) );
+	const browserNodeItem = null; //useSelector( ( state ) => getBackupBrowserNode( state, siteId, path ) );
 
 	const {
 		isSuccess,

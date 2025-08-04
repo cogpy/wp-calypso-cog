@@ -6,11 +6,7 @@ import {
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { FunctionComponent } from 'react';
-import useGetDisplayDate from 'calypso/components/jetpack/daily-backup-status/use-get-display-date';
 import { useFirstMatchingBackupAttempt } from 'calypso/my-sites/backup/hooks';
-import { useSelector } from 'calypso/state';
-import { getSiteSlug } from 'calypso/state/sites/selectors';
-import { getSelectedSiteId } from 'calypso/state/ui/selectors';
 import FileBrowserHeader from './file-browser-header';
 import FileBrowserNode from './file-browser-node';
 import { FileBrowserItem } from './types';
@@ -29,29 +25,26 @@ export interface FileBrowserConfig {
 interface FileBrowserProps {
 	rewindId: number;
 	fileBrowserConfig?: FileBrowserConfig;
-	siteId?: number;
+	siteId: number;
+	siteSlug: string;
 }
 
 const FileBrowser: FunctionComponent< FileBrowserProps > = ( {
 	rewindId,
 	fileBrowserConfig,
 	siteId,
+	siteSlug,
 } ) => {
 	// This is the path of the node that is clicked
 	const [ activeNodePath, setActiveNodePath ] = useState< string >( '' );
-	const selectedSiteId = useSelector( getSelectedSiteId ) as number;
-	const effectiveSiteId = siteId ?? selectedSiteId;
 
-	const effectiveSiteSlug = useSelector( ( state ) => getSiteSlug( state, effectiveSiteId ) ) || '';
-	const getDisplayDate = useGetDisplayDate( effectiveSiteId );
+	// TODO: Implement it
+	const getDisplayDate = ( dateTime, withLatest = true ) => ''; // useGetDisplayDate( siteId );
 
-	const { backupAttempt: lastKnownBackupAttempt } = useFirstMatchingBackupAttempt(
-		effectiveSiteId,
-		{
-			sortOrder: 'desc',
-			successOnly: true,
-		}
-	);
+	const { backupAttempt: lastKnownBackupAttempt } = useFirstMatchingBackupAttempt( siteId, {
+		sortOrder: 'desc',
+		successOnly: true,
+	} );
 
 	const displayBackupDate = lastKnownBackupAttempt
 		? getDisplayDate( lastKnownBackupAttempt.activityTs, false )
@@ -69,11 +62,11 @@ const FileBrowser: FunctionComponent< FileBrowserProps > = ( {
 
 	return (
 		<div>
-			<FileBrowserHeader
+			{/* <FileBrowserHeader
 				rewindId={ rewindId }
 				showHeaderButtons={ fileBrowserConfig?.showHeaderButtons ?? true }
-				siteId={ effectiveSiteId }
-			/>
+				siteId={ siteId }
+			/> */}
 			{ fileBrowserConfig?.showBackupTime && (
 				<HStack alignment="left" spacing={ 1 }>
 					<Text
@@ -86,7 +79,7 @@ const FileBrowser: FunctionComponent< FileBrowserProps > = ( {
 							  } )
 							: __( 'There are no backups.' ) }{ ' ' }
 						<ExternalLink
-							href={ `/backup/${ effectiveSiteSlug }` }
+							href={ `/backup/${ siteSlug }` }
 							children={ __( 'Create fresh backup now' ) }
 						/>
 					</Text>
@@ -100,7 +93,7 @@ const FileBrowser: FunctionComponent< FileBrowserProps > = ( {
 				setActiveNodePath={ handleClick }
 				activeNodePath={ activeNodePath }
 				fileBrowserConfig={ fileBrowserConfig }
-				siteId={ effectiveSiteId }
+				siteId={ siteId }
 			/>
 		</div>
 	);

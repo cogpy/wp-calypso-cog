@@ -17,6 +17,7 @@ import { recordTracksEvent } from 'calypso/state/analytics/actions/record';
 import getBackupBrowserCheckList from 'calypso/state/rewind/selectors/get-backup-browser-check-list';
 import getSiteSlug from 'calypso/state/sites/selectors/get-site-slug';
 import isJetpackSiteMultiSite from 'calypso/state/sites/selectors/is-jetpack-site-multi-site';
+import { getSelectedSiteId } from 'calypso/state/ui/selectors';
 import { backupMainPath } from '../paths';
 import FileBrowser from './file-browser';
 import './style.scss';
@@ -36,6 +37,7 @@ const BackupContentsPage: FunctionComponent< OwnProps > = ( { rewindId, siteId }
 
 	const isMultiSite = useSelector( ( state ) => isJetpackSiteMultiSite( state, siteId ) );
 	const siteSlug = useSelector( ( state ) => getSiteSlug( state, siteId ) );
+	const selectedSiteId = useSelector( getSelectedSiteId ) as number;
 
 	useEffect( () => {
 		dispatch( recordTracksEvent( 'calypso_jetpack_backup_browser_view' ) );
@@ -80,7 +82,11 @@ const BackupContentsPage: FunctionComponent< OwnProps > = ( { rewindId, siteId }
 						) }
 					</div>
 					<div className="backup-contents-page__body">
-						<FileBrowser rewindId={ rewindId } />
+						<FileBrowser
+							siteId={ selectedSiteId }
+							siteSlug={ siteSlug ?? '' }
+							rewindId={ rewindId }
+						/>
 					</div>
 				</Card>
 			</Main>

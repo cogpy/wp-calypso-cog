@@ -1,3 +1,4 @@
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
 	Button,
 	ExternalLink,
@@ -23,27 +24,21 @@ import {
 import { __, isRTL } from '@wordpress/i18n';
 import { error, chevronRight, chevronLeft } from '@wordpress/icons';
 import clsx from 'clsx';
-import QueryRewindState from 'calypso/components/data/query-rewind-state';
-import InlineSupportLink from 'calypso/dashboard/components/inline-support-link';
-import { SectionHeader } from 'calypso/dashboard/components/section-header';
-import SiteEnvironmentBadge, {
-	EnvironmentType,
-} from 'calypso/dashboard/components/site-environment-badge';
-import FileBrowser from 'calypso/my-sites/backup/backup-contents-page/file-browser';
-import { useFirstMatchingBackupAttempt } from 'calypso/my-sites/backup/hooks';
+import { Suspense, lazy } from 'react';
+import { useAnalytics } from '../../app/analytics';
+import { siteLastBackupQuery } from '../../app/queries/site-backups';
+import { siteRewindQuery } from '../../app/queries/site-rewind';
 import {
-	usePullFromStagingMutation,
-	usePushToStagingMutation,
-} from 'calypso/sites/staging-site/hooks/use-staging-sync';
-import { useSelector, useDispatch } from 'calypso/state';
-import { recordTracksEvent } from 'calypso/state/analytics/actions';
-import { setNodeCheckState } from 'calypso/state/rewind/browser/actions';
-import getBackupBrowserCheckList from 'calypso/state/rewind/selectors/get-backup-browser-check-list';
-import getBackupBrowserNode from 'calypso/state/rewind/selectors/get-backup-browser-node';
-import isSiteStore from 'calypso/state/selectors/is-site-store';
-import { getSiteSlug, getSiteTitle } from 'calypso/state/sites/selectors';
+	stagingSitePushToStagingMutation,
+	stagingSitePullFromStagingMutation,
+} from '../../app/queries/site-staging-sites';
+import InlineSupportLink from '../../components/inline-support-link';
+import { SectionHeader } from '../../components/section-header';
+import SiteEnvironmentBadge, { EnvironmentType } from '../../components/site-environment-badge';
+import { getSiteDisplayName } from '../../utils/site-name';
+// import { setNodeCheckState } from 'calypso/state/rewind/browser/actions';
+import type { Site } from '../../data/types';
 import type { FileBrowserConfig } from 'calypso/my-sites/backup/backup-contents-page/file-browser';
-
 import './style.scss';
 
 const ROOT_PATH = '/';
@@ -60,6 +55,13 @@ const fileBrowserConfig: FileBrowserConfig = {
 	showFileCard: false,
 	showBackupTime: true,
 };
+
+const FileBrowser = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "async-load-backup-file-browser" */ 'calypso/my-sites/backup/backup-contents-page/file-browser'
+		)
+);
 
 const DirectionArrow = () => {
 	return (
@@ -104,6 +106,8 @@ const EnvironmentLabel = ( { label, environmentType, siteTitle }: EnvironmentLab
 };
 
 interface SyncModalProps {
+	productionSite: Site;
+	stagingSite: Site;
 	onClose: () => void;
 	syncType: 'pull' | 'push';
 	environment: 'production' | 'staging';
@@ -181,15 +185,50 @@ const getSyncConfig = ( type: 'pull' | 'push' ): SyncConfig => {
 	};
 };
 
+const getBackupBrowserNode = ( rewind: any, pathList: string[] | string ) => {
+	let currentNode = rewind?.browser?.rootNode ?? undefined;
+	if ( currentNode === undefined ) {
+		return currentNode;
+	}
+
+	if ( pathList.length === 0 ) {
+		return undefined;
+	}
+
+	if ( typeof pathList === 'string' ) {
+		pathList = pathList.split( '/' );
+		pathList = pathList.filter( ( pathPart ) => pathPart.length > 0 );
+	}
+
+	// We're starting at the root node so we'll remove it from the top of the array if it exists
+	// If we got a string of '/' we may end up with 0 length now, but want the root.
+	if ( pathList.length > 0 && pathList[ 0 ] === '/' ) {
+		pathList.shift();
+	}
+
+	for ( const pathPart of pathList ) {
+		const childNode = currentNode.children.find( ( node ) => node.path === pathPart );
+		if ( ! childNode ) {
+			return undefined;
+		}
+		currentNode = childNode;
+	}
+	return currentNode;
+};
+
+const isSiteStore = ( site: Site ) => {
+	return site.jetpack && site.options?.woocommerce_is_active;
+};
+
 export default function SyncModal( {
+	productionSite,
+	stagingSite,
 	onClose,
 	syncType,
 	environment,
-	productionSiteId,
-	stagingSiteId,
 	onSyncStart,
 }: SyncModalProps ) {
-	const dispatch = useDispatch();
+	const { recordTracksEvent } = useAnalytics();
 	const syncConfig = getSyncConfig( syncType );
 	const [ isFileBrowserVisible, setIsFileBrowserVisible ] = useState( false );
 	const [ domainConfirmation, setDomainConfirmation ] = useState( '' );
@@ -197,13 +236,14 @@ export default function SyncModal( {
 	const targetEnvironment = syncConfig[ environment ].syncTo;
 	const sourceEnvironment = syncConfig[ environment ].syncFrom;
 
-	const productionSiteSlug =
-		useSelector( ( state ) => getSiteSlug( state, productionSiteId ) ) || '';
-	const stagingSiteSlug = useSelector( ( state ) => getSiteSlug( state, stagingSiteId ) ) || '';
+	const productionSiteId = productionSite.ID;
+	const stagingSiteId = stagingSite.ID;
 
-	const productionSiteTitle =
-		useSelector( ( state ) => getSiteTitle( state, productionSiteId ) ) || '';
-	const stagingSiteTitle = useSelector( ( state ) => getSiteTitle( state, stagingSiteId ) ) || '';
+	const productionSiteSlug = productionSite.slug;
+	const stagingSiteSlug = stagingSite.slug;
+
+	const productionSiteTitle = getSiteDisplayName( productionSite );
+	const stagingSiteTitle = getSiteDisplayName( stagingSite );
 
 	const targetSiteSlug = targetEnvironment === 'production' ? productionSiteSlug : stagingSiteSlug;
 
@@ -211,23 +251,25 @@ export default function SyncModal( {
 	const targetSiteTitle =
 		targetEnvironment === 'production' ? productionSiteTitle : stagingSiteTitle;
 
-	const querySiteId = sourceEnvironment === 'staging' ? stagingSiteId : productionSiteId;
-	const querySiteSlug = sourceEnvironment === 'staging' ? stagingSiteSlug : productionSiteSlug;
+	const querySite = sourceEnvironment === 'staging' ? stagingSite : productionSite;
+	const querySiteId = querySite.ID;
+	const querySiteSlug = querySite.slug;
 
-	const browserCheckList = useSelector( ( state ) =>
-		getBackupBrowserCheckList( state, querySiteId )
-	);
+	const { data: siteRewind } = useQuery( siteRewindQuery( querySiteId ) );
+	const { data: lastBackup } = useQuery( siteLastBackupQuery( querySiteId ) );
+	console.log( siteRewind );
+	const setNodeCheckState = ( siteId: number, node: string, status: string ) => {
+		console.log( siteId, node, status );
+	};
+
+	const browserCheckList = siteRewind?.browser;
 
 	// Calculate checkbox state based only on visible nodes (wp-content and wp-config.php)
-	const wpContentNode = useSelector( ( state ) =>
-		getBackupBrowserNode( state, querySiteId, WP_CONTENT_PATH )
-	);
-	const wpConfigNode = useSelector( ( state ) =>
-		getBackupBrowserNode( state, querySiteId, WP_CONFIG_PATH )
-	);
-	const sqlNode = useSelector( ( state ) => getBackupBrowserNode( state, querySiteId, SQL_PATH ) );
+	const wpContentNode = getBackupBrowserNode( siteRewind, WP_CONTENT_PATH );
+	const wpConfigNode = getBackupBrowserNode( siteRewind, WP_CONFIG_PATH );
+	const sqlNode = getBackupBrowserNode( siteRewind, SQL_PATH );
 
-	const isSiteWooStore = !! useSelector( ( state ) => isSiteStore( state, querySiteId ) );
+	const isSiteWooStore = isSiteStore( querySite );
 	const filesAndFoldersNodesCheckState = useMemo( () => {
 		const nodes = [ wpContentNode, wpConfigNode ].filter( Boolean );
 		if ( nodes.length === 0 ) {
@@ -253,56 +295,44 @@ export default function SyncModal( {
 		return 'mixed';
 	}, [ wpContentNode, wpConfigNode ] );
 
-	const { pullFromStaging } = usePullFromStagingMutation( productionSiteId, stagingSiteId, {
+	const pullFromStagingMutation = useMutation( {
+		...stagingSitePullFromStagingMutation( productionSiteId, stagingSiteId ),
 		onSuccess: ( _, options ) => {
-			dispatch(
-				recordTracksEvent( 'calypso_hosting_configuration_staging_site_pull_success', options )
-			);
+			recordTracksEvent( 'calypso_hosting_configuration_staging_site_pull_success', options );
 		},
 		onError: ( error, options ) => {
-			dispatch(
-				recordTracksEvent( 'calypso_hosting_configuration_staging_site_pull_failure', {
-					code: error.code,
-					...options,
-				} )
-			);
-			// setSyncError( error.code );
+			recordTracksEvent( 'calypso_hosting_configuration_staging_site_pull_failure', {
+				code: error.code,
+				...options,
+			} );
 		},
 	} );
 
-	const { pushToStaging } = usePushToStagingMutation( productionSiteId, stagingSiteId, {
+	const pushToStagingMutation = useMutation( {
+		...stagingSitePushToStagingMutation( productionSiteId, stagingSiteId ),
 		onSuccess: ( _, options ) => {
-			dispatch(
-				recordTracksEvent( 'calypso_hosting_configuration_staging_site_push_success', options )
-			);
+			recordTracksEvent( 'calypso_hosting_configuration_staging_site_push_success', options );
 		},
 		onError: ( error, options ) => {
-			dispatch(
-				recordTracksEvent( 'calypso_hosting_configuration_staging_site_push_failure', {
-					code: error.code,
-					...options,
-				} )
-			);
-			// setSyncError( error.code );
+			recordTracksEvent( 'calypso_hosting_configuration_staging_site_push_failure', {
+				code: error.code,
+				...options,
+			} );
 		},
 	} );
 
-	const { backupAttempt: lastKnownBackupAttempt } = useFirstMatchingBackupAttempt( querySiteId, {
-		sortOrder: 'desc',
-		successOnly: true,
-	} );
-	const rewindId = lastKnownBackupAttempt?.rewindId;
+	const rewindId = lastBackup?.rewindId;
 
-	const shouldDisableGranularSync = ! lastKnownBackupAttempt;
+	const shouldDisableGranularSync = ! lastBackup;
 
 	useEffect( () => {
 		if ( shouldDisableGranularSync ) {
-			dispatch( setNodeCheckState( querySiteId, ROOT_PATH, 'checked' ) );
-			dispatch( setNodeCheckState( querySiteId, WP_CONTENT_PATH, 'checked' ) );
-			dispatch( setNodeCheckState( querySiteId, WP_CONFIG_PATH, 'checked' ) );
-			dispatch( setNodeCheckState( querySiteId, SQL_PATH, 'checked' ) );
+			setNodeCheckState( querySiteId, ROOT_PATH, 'checked' );
+			setNodeCheckState( querySiteId, WP_CONTENT_PATH, 'checked' );
+			setNodeCheckState( querySiteId, WP_CONFIG_PATH, 'checked' );
+			setNodeCheckState( querySiteId, SQL_PATH, 'checked' );
 		}
-	}, [ dispatch, querySiteId, shouldDisableGranularSync ] );
+	}, [ querySiteId, shouldDisableGranularSync ] );
 
 	const handleConfirm = () => {
 		let include_paths = browserCheckList.includeList.map( ( item ) => item.id ).join( ',' );
@@ -322,9 +352,9 @@ export default function SyncModal( {
 			( syncType === 'pull' && environment === 'production' ) ||
 			( syncType === 'push' && environment === 'staging' )
 		) {
-			pullFromStaging( { types: 'paths', include_paths, exclude_paths } );
+			pullFromStagingMutation.mutate( { types: 'paths', include_paths, exclude_paths } );
 		} else {
-			pushToStaging( { types: 'paths', include_paths, exclude_paths } );
+			pushToStagingMutation.mutate( { types: 'paths', include_paths, exclude_paths } );
 		}
 
 		onClose();
@@ -332,10 +362,10 @@ export default function SyncModal( {
 
 	const updateFilesAndFoldersCheckState = useCallback(
 		( checkState: 'checked' | 'unchecked' | 'mixed' ) => {
-			dispatch( setNodeCheckState( querySiteId, WP_CONTENT_PATH, checkState ) );
-			dispatch( setNodeCheckState( querySiteId, WP_CONFIG_PATH, checkState ) );
+			setNodeCheckState( querySiteId, WP_CONTENT_PATH, checkState );
+			setNodeCheckState( querySiteId, WP_CONFIG_PATH, checkState );
 		},
-		[ dispatch, querySiteId ]
+		[ querySiteId ]
 	);
 
 	const handleDomainConfirmation = useCallback(
@@ -351,9 +381,9 @@ export default function SyncModal( {
 
 	const handleDatabaseCheckboxChange = () => {
 		if ( sqlNode?.checkState === 'checked' ) {
-			dispatch( setNodeCheckState( querySiteId, SQL_PATH, 'unchecked' ) );
+			setNodeCheckState( querySiteId, SQL_PATH, 'unchecked' );
 		} else {
-			dispatch( setNodeCheckState( querySiteId, SQL_PATH, 'checked' ) );
+			setNodeCheckState( querySiteId, SQL_PATH, 'checked' );
 		}
 	};
 
@@ -374,7 +404,7 @@ export default function SyncModal( {
 
 	const isButtonDisabled =
 		( showDomainConfirmation && domainConfirmation !== productionSiteSlug ) ||
-		( browserCheckList.totalItems === 0 && browserCheckList.includeList.length === 0 );
+		( browserCheckList?.totalItems === 0 && browserCheckList?.includeList.length === 0 );
 
 	return (
 		<Modal
@@ -382,7 +412,6 @@ export default function SyncModal( {
 			onRequestClose={ onClose }
 			style={ { maxWidth: '668px' } }
 		>
-			<QueryRewindState siteId={ querySiteId } />
 			<VStack spacing={ 6 }>
 				<Text>
 					{ createInterpolateElement( syncConfig[ environment ].description, {
@@ -454,12 +483,14 @@ export default function SyncModal( {
 					 * to ensure its child nodes initialize properly and can be selected by default.
 					 */ }
 					<div className={ isFileBrowserVisible ? '' : 'hidden' }>
-						<FileBrowser
-							rewindId={ rewindId }
-							siteId={ querySiteId }
-							siteSlug={ querySiteSlug }
-							fileBrowserConfig={ fileBrowserConfig }
-						/>
+						<Suspense fallback={ null }>
+							<FileBrowser
+								rewindId={ rewindId }
+								siteId={ querySiteId }
+								siteSlug={ querySiteSlug }
+								fileBrowserConfig={ fileBrowserConfig }
+							/>
+						</Suspense>
 					</div>
 					<HStack
 						alignment="left"

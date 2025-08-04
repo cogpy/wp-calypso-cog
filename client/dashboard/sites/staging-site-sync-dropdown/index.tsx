@@ -1,32 +1,59 @@
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Button, Dropdown, MenuGroup, MenuItem } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronDown, cloudDownload, cloudUpload } from '@wordpress/icons';
 import { lazy, Suspense } from 'react';
+import { siteBySlugQuery, siteByIdQuery } from '../../app/queries/site';
+import { stagingSiteSyncStateQuery } from '../../app/queries/site-staging-sites';
+import {
+	getProductionSiteId,
+	getStagingSiteId,
+	isStagingSiteSyncing,
+} from '../../utils/site-staging-site';
 
 const StagingSiteSyncModal = lazy(
-	() => import( 'calypso/sites/staging-site/components/staging-site-sync-modal' )
+	() =>
+		import(
+			/* webpackChunkName: "async-load-staging-site-sync-modal" */ '../staging-site-sync-modal'
+		)
 );
 
-interface SyncDropdownProps {
+interface StagingSiteSyncDropdownProps {
+	siteSlug: string;
 	className?: string;
-	environment: 'production' | 'staging';
-	productionSiteId: number;
-	stagingSiteId: number;
-	isSyncInProgress: boolean;
-	onSyncStart: () => void;
 }
 
-export default function SyncDropdown( {
+export default function StagingSiteSyncDropdown( {
+	siteSlug,
 	className,
-	environment,
-	productionSiteId,
-	stagingSiteId,
-	isSyncInProgress,
-	onSyncStart,
-}: SyncDropdownProps ) {
+}: StagingSiteSyncDropdownProps ) {
 	const [ isModalOpen, setIsModalOpen ] = useState< boolean >( false );
 	const [ syncType, setSyncType ] = useState< 'pull' | 'push' >( 'pull' );
+	const { data: site } = useSuspenseQuery( siteBySlugQuery( siteSlug ) );
+	const environment = ! site.is_wpcom_staging_site ? 'production' : 'staging';
+
+	const productionSiteId = getProductionSiteId( site );
+
+	const stagingSiteId = getStagingSiteId( site );
+
+	const otherEnvironmentSiteId = environment === 'staging' ? productionSiteId : stagingSiteId;
+
+	const { data: otherEnvironmentSite } = useQuery( {
+		...siteByIdQuery( otherEnvironmentSiteId ?? 0 ),
+		enabled: !! otherEnvironmentSiteId,
+	} );
+
+	const { data: syncState } = useQuery( {
+		...stagingSiteSyncStateQuery( productionSiteId ?? 0 ),
+		enabled: false,
+		refetchInterval: ( data ) => {
+			return isStagingSiteSyncing( data ) ? 5000 : false;
+		},
+		refetchIntervalInBackground: true,
+	} );
+
+	const isSyncing = isStagingSiteSyncing( syncState );
 
 	const pullLabel =
 		environment === 'staging' ? __( 'Pull from Production' ) : __( 'Pull from Staging' );
@@ -42,6 +69,14 @@ export default function SyncDropdown( {
 		setIsModalOpen( false );
 	};
 
+	const handleSyncStart = () => {};
+
+	console.log( syncState );
+
+	if ( ! productionSiteId || ! stagingSiteId ) {
+		return null;
+	}
+
 	return (
 		<>
 			<Dropdown
@@ -54,9 +89,9 @@ export default function SyncDropdown( {
 						variant="secondary"
 						aria-expanded={ isOpen }
 						onClick={ () => onToggle() }
-						disabled={ isSyncInProgress }
+						disabled={ isSyncing }
 					>
-						{ isSyncInProgress ? __( 'Syncing…' ) : __( 'Sync' ) }
+						{ isSyncing ? __( 'Syncing…' ) : __( 'Sync' ) }
 					</Button>
 				) }
 				renderContent={ ( { onClose } ) => (
@@ -89,12 +124,12 @@ export default function SyncDropdown( {
 			{ isModalOpen && (
 				<Suspense fallback={ null }>
 					<StagingSiteSyncModal
+						productionSite={ environment === 'production' ? site : otherEnvironmentSite }
+						stagingSite={ environment === 'staging' ? site : otherEnvironmentSite }
 						onClose={ handleCloseModal }
 						syncType={ syncType }
 						environment={ environment }
-						productionSiteId={ productionSiteId }
-						stagingSiteId={ stagingSiteId }
-						onSyncStart={ onSyncStart }
+						onSyncStart={ handleSyncStart }
 					/>
 				</Suspense>
 			) }
