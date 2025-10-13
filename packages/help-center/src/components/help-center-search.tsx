@@ -1,6 +1,7 @@
 /* eslint-disable no-restricted-imports */
 import { recordTracksEvent } from '@automattic/calypso-analytics';
-import { useDispatch } from '@wordpress/data';
+import { useLocale } from '@automattic/i18n-utils';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { useState, useCallback, useEffect } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
@@ -8,6 +9,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import InlineHelpSearchCard from 'calypso/blocks/inline-help/inline-help-search-card';
 import { preventWidows } from 'calypso/lib/formatting';
 import { useHelpCenterContext } from '../contexts/HelpCenterContext';
+import { useContextBasedSearchMapping } from '../hooks/use-context-based-search-mapping';
+import { useHelpSearchQuery } from '../hooks/use-help-search-query';
 import { HELP_CENTER_STORE } from '../stores';
 import { SearchResult } from '../types';
 import { HelpCenterLaunchpad } from './help-center-launchpad';
@@ -15,6 +18,9 @@ import { HelpCenterMoreResources } from './help-center-more-resources';
 import HelpCenterRecentConversations from './help-center-recent-conversations';
 import HelpCenterSearchResults from './help-center-search-results';
 import { BlockedZendeskNotice } from './notices';
+import PlaceholderLines from './placeholder-lines';
+import type { HelpCenterSelect } from '@automattic/data-stores';
+
 import './help-center-search.scss';
 import './help-center-launchpad.scss';
 
@@ -26,6 +32,7 @@ type HelpCenterSearchProps = {
 export const HelpCenterSearch = ( { onSearchChange, currentRoute }: HelpCenterSearchProps ) => {
 	const navigate = useNavigate();
 	const { search } = useLocation();
+	const locale = useLocale();
 	const params = new URLSearchParams( search );
 	const { sectionName, site, currentUser } = useHelpCenterContext();
 	const query = params.get( 'query' );
@@ -44,6 +51,18 @@ export const HelpCenterSearch = ( { onSearchChange, currentRoute }: HelpCenterSe
 			onSearchChange?.( query );
 		},
 		[ setSubject, setMessage, onSearchChange ]
+	);
+
+	const contextTerm = useSelect(
+		( select ) => ( select( HELP_CENTER_STORE ) as HelpCenterSelect ).getContextTerm(),
+		[]
+	);
+	const { contextSearch } = useContextBasedSearchMapping( currentRoute );
+
+	const { data: searchData, isLoading: isSearching } = useHelpSearchQuery(
+		searchQuery || contextTerm || contextSearch, // If there's a query, we don't context search
+		locale,
+		currentRoute
 	);
 
 	const isSiteOwner = site?.site_owner === currentUser?.ID;
@@ -97,24 +116,28 @@ export const HelpCenterSearch = ( { onSearchChange, currentRoute }: HelpCenterSe
 			<HelpCenterRecentConversations />
 			<BlockedZendeskNotice />
 			{ launchpadEnabled && <HelpCenterLaunchpad /> }
-			<InlineHelpSearchCard
-				searchQuery={ searchQuery }
-				onSearch={ setSearchQueryAndEmailSubject }
-				location="help-center"
-				isVisible
-				placeholder={ __( 'Search guides…', __i18n_text_domain__ ) }
-				sectionName={ sectionName }
-				useSearchControl
-			/>
+			{ isSearching && <PlaceholderLines lines={ 4 } /> }
+			{ ! isSearching && (
+				<InlineHelpSearchCard
+					searchQuery={ searchQuery }
+					onSearch={ setSearchQueryAndEmailSubject }
+					location="help-center"
+					isVisible
+					placeholder={ __( 'Search guides…', __i18n_text_domain__ ) }
+					sectionName={ sectionName }
+					useSearchControl
+				/>
+			) }
 			<HelpCenterSearchResults
 				onSelect={ redirectToArticle }
 				searchQuery={ searchQuery || '' }
 				openAdminInNewTab
-				placeholderLines={ 4 }
 				location="help-center"
+				isSearching={ isSearching }
+				searchData={ searchData }
 				currentRoute={ currentRoute }
 			/>
-			{ ! searchQuery && <HelpCenterMoreResources /> }
+			{ ! searchQuery && ! isSearching && <HelpCenterMoreResources /> }
 		</div>
 	);
 };

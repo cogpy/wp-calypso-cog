@@ -52,7 +52,7 @@ export interface FeatureFlags {
 }
 
 export interface SearchResult {
-	railcar: {
+	railcar?: {
 		railcar?: string;
 		fetch_algo?: string;
 		fetch_lang?: string;
