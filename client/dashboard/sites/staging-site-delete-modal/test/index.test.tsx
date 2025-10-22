@@ -218,7 +218,7 @@ describe( 'StagingSiteDeleteModal', () => {
 			Object.defineProperty( window, 'location', {
 				writable: true,
 				value: {
-					pathname: '/v2/sites/test-site',
+					pathname: '/manage/sites/test-site',
 				},
 			} );
 		} );

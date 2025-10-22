@@ -9,7 +9,7 @@ The dashboard architecture is designed to support multiple entry points, where e
 
 Currently, during the prototyping phase, the dashboard supports two main entry points:
 
-- WordPress.com (dotcom) at `/v2`
+- WordPress.com (dotcom) at `/manage`
 - Automattic for Agencies (a4a) at `/v2-a4a`
 - CIAB at `/ciab`
 
@@ -26,7 +26,7 @@ Add a new section definition in `client/dashboard/section.ts`:
 ```typescript
 export const DASHBOARD_NEWPRODUCT_SECTION_DEFINITION = {
   name: 'dashboard-newproduct',
-  paths: [ '/v2-newproduct' ],
+  paths: [ '/newproduct' ],
   module: 'dashboard/app-newproduct',
 };
 ```
@@ -43,7 +43,7 @@ import Logo from './logo';
 import './style.scss';
 
 boot( {
-  basePath: '/v2-newproduct',
+  basePath: '/newproduct',
   mainRoute: '/sites', // Or whichever route should be the default
   Logo,
   supports: {
