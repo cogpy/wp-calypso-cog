@@ -109,7 +109,7 @@ const domain: FlowV2< typeof initialize > = {
 					// replace the location to delete processing step from history.
 					return window.location.assign(
 						addQueryArgs( `/checkout/${ encodeURIComponent( siteSlug ) }`, {
-							redirect_to: `/v2/sites/${ siteSlug }/domains`,
+							redirect_to: `/manage/sites/${ siteSlug }/domains`,
 							signup: 0,
 							cancel_to: new URL(
 								addQueryArgs( '/setup/domain', { siteSlug } ),
@@ -182,7 +182,7 @@ const domain: FlowV2< typeof initialize > = {
 					if ( providedDependencies.newExistingSiteChoice === 'domain' ) {
 						return window.location.assign(
 							addQueryArgs( '/checkout/no-site', {
-								redirect_to: '/v2/domains',
+								redirect_to: '/manage/domains',
 								signup: 0,
 								isDomainOnly: 1,
 								cancel_to: new URL(
@@ -251,7 +251,7 @@ const domain: FlowV2< typeof initialize > = {
 					return navigate( STEPS.PROCESSING.slug, undefined, true );
 				case STEPS.PROCESSING.slug: {
 					if ( providedDependencies.processingResult === ProcessingResult.SUCCESS ) {
-						const destination = `/v2/sites/${ providedDependencies.siteSlug }/domains`;
+						const destination = `/manage/sites/${ providedDependencies.siteSlug }/domains`;
 
 						persistSignupDestination( destination );
 						setSignupCompleteFlowName( this.name );
