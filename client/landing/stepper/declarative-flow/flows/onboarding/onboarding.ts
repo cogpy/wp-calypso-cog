@@ -70,10 +70,10 @@ const onboarding: FlowV2< typeof initialize > = {
 		} = useDispatch( ONBOARD_STORE ) as OnboardActions;
 		const locale = useFlowLocale();
 
-		const { signupDomainOrigin, planProductId } = useSelect(
+		const { signupDomainOrigin, planCartItem } = useSelect(
 			( select ) => ( {
 				signupDomainOrigin: ( select( ONBOARD_STORE ) as OnboardSelect ).getSignupDomainOrigin(),
-				planProductId: ( select( ONBOARD_STORE ) as OnboardSelect ).getPlanProductId(),
+				planCartItem: ( select( ONBOARD_STORE ) as OnboardSelect ).getPlanCartItem(),
 			} ),
 			[]
 		);
@@ -87,17 +87,22 @@ const onboarding: FlowV2< typeof initialize > = {
 		 * Returns [destination, backDestination] for the post-checkout destination.
 		 */
 		const getPostCheckoutDestination = async (
-			providedDependencies: ProvidedDependencies
+			providedDependencies: ProvidedDependencies,
+			planCartItem: MinimalRequestCartProduct | null
 		): Promise< [ string, string | null ] > => {
 			if ( ! providedDependencies.hasExternalTheme && providedDependencies.hasPluginByGoal ) {
 				return [ `/home/${ providedDependencies.siteSlug }`, null ];
 			}
 
-			if (
-				playgroundId &&
-				providedDependencies.siteSlug &&
-				planProductId !== FREE_PLAN_PRODUCT_ID
-			) {
+			if ( playgroundId && providedDependencies.siteSlug ) {
+				// Check if the user selected the free plan
+				const isFree = ! planCartItem || planCartItem.product_id === FREE_PLAN_PRODUCT_ID;
+
+				if ( isFree ) {
+					// Redirect free plan users to a home page
+					return [ `/home/${ providedDependencies.siteSlug }`, null ];
+				}
+
 				return [
 					addQueryArgs( withLocale( '/setup/site-setup/importerPlayground', locale ), {
 						siteSlug: providedDependencies.siteSlug,
@@ -218,8 +223,10 @@ const onboarding: FlowV2< typeof initialize > = {
 					setShouldShowNotification( providedDependencies?.siteId as number );
 					return navigate( 'processing' );
 				case 'processing': {
-					const [ destination, backDestination ] =
-						await getPostCheckoutDestination( providedDependencies );
+					const [ destination, backDestination ] = await getPostCheckoutDestination(
+						providedDependencies,
+						planCartItem
+					);
 					if ( providedDependencies.processingResult === ProcessingResult.SUCCESS ) {
 						persistSignupDestination( destination );
 						setSignupCompleteFlowName( flowName );
@@ -234,7 +241,7 @@ const onboarding: FlowV2< typeof initialize > = {
 							 */
 							const playgroundId = getQueryArg( window.location.href, 'playground' );
 							const redirectTo: string =
-								playgroundId && planProductId !== FREE_PLAN_PRODUCT_ID
+								playgroundId && planCartItem?.product_id !== FREE_PLAN_PRODUCT_ID
 									? addQueryArgs( withLocale( '/setup/site-setup/importerPlayground', locale ), {
 											siteSlug,
 											siteId: providedDependencies.siteId,
