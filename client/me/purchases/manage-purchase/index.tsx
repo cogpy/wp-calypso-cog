@@ -1823,10 +1823,10 @@ function getCancelPurchaseNavText(
 
 	if ( isDomainRegistration( purchase ) ) {
 		text = translate( 'Cancel domain' );
-	} else if ( isPlan( purchase ) ) {
-		text = translate( 'Cancel plan' );
 	} else if ( isSubscription( purchase ) ) {
 		text = translate( 'Cancel subscription' );
+	} else if ( isPlan( purchase ) ) {
+		text = translate( 'Cancel plan' );
 	} else if ( isOneTimePurchase( purchase ) ) {
 		text = translate( 'Cancel' );
 	}
