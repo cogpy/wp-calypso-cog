@@ -14,7 +14,15 @@ export default function DomainContactInfo() {
 	const registrantWhoisData = findRegistrantWhois( whoisData );
 
 	return (
-		<PageLayout size="small" header={ <PageHeader prefix={ <Breadcrumbs length={ 2 } /> } /> }>
+		<PageLayout
+			size="small"
+			header={
+				<PageHeader
+					prefix={ <Breadcrumbs length={ 2 } /> }
+					description={ __( "Update your domain's contact information for registration." ) }
+				/>
+			}
+		>
 			<ContactForm
 				domainName={ domainName }
 				initialData={
