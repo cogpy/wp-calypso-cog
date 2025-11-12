@@ -1,5 +1,6 @@
 import { domainWhoisQuery } from '@automattic/api-queries';
 import { useQuery } from '@tanstack/react-query';
+import { __ } from '@wordpress/i18n';
 import Breadcrumbs from '../../app/breadcrumbs';
 import { domainRoute } from '../../app/router/domains';
 import { PageHeader } from '../../components/page-header';
