@@ -70,14 +70,14 @@ function getFetchSiteListParams(
 		'icon.ico': 'site_icon',
 		backup: 'has_backup',
 		views: 'stats_visitors',
-		// plan
+		plan: 'plan',
 		// wp_version
 		// is_a8c
 		// preview
 		// last_published
 		// uptime
 		// visitors
-		// subscribers_count
+		subscribers_count: 'total_wpcom_subscribers',
 		// links
 		// php_version
 		// storage
@@ -128,6 +128,8 @@ function siteProfileSiteToSite( site: SiteProfileSite ): Site {
 		is_coming_soon: Boolean( site.wpcom_status?.is_coming_soon ),
 		is_private: Boolean( site.private ),
 		is_wpcom_staging_site: Boolean( site.wpcom_status?.is_staging ),
+		subscribers_count: site.total_wpcom_subscribers,
+		plan: site.plan,
 		capabilities: {
 			manage_options: false, // TODO
 			update_plugins: false, // TODO

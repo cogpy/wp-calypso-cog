@@ -19,6 +19,11 @@ export interface SiteProfileSite {
 	};
 	private?: boolean;
 	deleted?: boolean;
+	total_wpcom_subscribers?: number;
+	plan?: null | {
+		product_id: number;
+		product_name_short: string;
+	};
 }
 
 export interface DashboardSiteListResponse {
