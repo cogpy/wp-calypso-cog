@@ -99,6 +99,8 @@ export function useCreateCreditCard( {
 			} ),
 		[ initialUseForAllSubscriptions, allowUseForAllSubscriptions ]
 	);
+	const shouldUseVgs = isEnabled( 'checkout/vgs-ebanx' ) && shouldUseEbanx;
+
 	const stripeMethod = useMemo(
 		() =>
 			shouldLoadStripeMethod
@@ -106,6 +108,7 @@ export function useCreateCreditCard( {
 						currency,
 						store: stripePaymentMethodStore,
 						shouldUseEbanx,
+						shouldUseVgs,
 						shouldShowTaxFields,
 						submitButtonContent,
 						allowUseForAllSubscriptions,
@@ -117,6 +120,7 @@ export function useCreateCreditCard( {
 			shouldLoadStripeMethod,
 			stripePaymentMethodStore,
 			shouldUseEbanx,
+			shouldUseVgs,
 			shouldShowTaxFields,
 			submitButtonContent,
 			allowUseForAllSubscriptions,
