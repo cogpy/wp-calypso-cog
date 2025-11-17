@@ -212,7 +212,7 @@ function SiteActivityLogsDataViews( {
 				children={ hasActivityLogsAccess ? undefined : <DataViews.Layout /> } // showing only the layout when on the free plan.
 			/>
 
-			{ ! hasActivityLogsAccess && ! isFetching && (
+			{ ! hasActivityLogsAccess && ! isFetching && activityLogData?.activityLogs?.length && (
 				<HStack alignment="center" className="site-logs-card--activity-callout">
 					<div className="site-logs-card--activity-callout-content">
 						<ActivityLogsCallout siteSlug={ site.slug } />
