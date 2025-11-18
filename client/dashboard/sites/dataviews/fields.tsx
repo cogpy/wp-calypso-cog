@@ -1,6 +1,6 @@
 import { isEnabled } from '@automattic/calypso-config';
 import { __ } from '@wordpress/i18n';
-import SiteIcon from '../../components/site-icon';
+import SiteIcon, { SiteIconES } from '../../components/site-icon';
 import TimeSince from '../../components/time-since';
 import { getSiteDisplayName } from '../../utils/site-name';
 import { getSitePlanDisplayName } from '../../utils/site-plan';
@@ -13,14 +13,17 @@ import {
 	LastBackup,
 	MediaStorage,
 	Name,
+	NameES,
 	PHPVersion,
 	Plan,
+	PlanES,
 	Preview,
 	Status,
 	URL,
+	URLES,
 	Uptime,
 } from '../site-fields';
-import type { Site } from '@automattic/api-core';
+import type { DashboardSiteListSite, Site } from '@automattic/api-core';
 import type { Field, Operator } from '@wordpress/dataviews';
 
 function getDefaultFields(): Field< Site >[] {
@@ -153,6 +156,43 @@ function getDefaultFields(): Field< Site >[] {
 	];
 }
 
+function getDefaultFieldsES(): Field< DashboardSiteListSite >[] {
+	return [
+		{
+			id: 'name',
+			label: __( 'Site' ),
+			enableHiding: false,
+			enableGlobalSearch: false, // TODO
+			getValue: ( { item } ) => item.name ?? '',
+			render: ( { field, item } ) => (
+				<NameES siteSlug={ item.slug } value={ field.getValue( { item } ) } />
+			),
+			enableSorting: false, // TODO
+		},
+		{
+			id: 'url',
+			label: __( 'URL' ),
+			enableGlobalSearch: true,
+			getValue: ( { item } ) => item.url?.value ?? '',
+			render: ( { field, item } ) => <URLES site={ item } value={ field.getValue( { item } ) } />,
+		},
+		{
+			id: 'icon.ico',
+			label: __( 'Site icon' ),
+			render: ( { item } ) => <SiteIconES site={ item } />,
+			enableSorting: false,
+		},
+		{
+			id: 'plan',
+			label: __( 'Plan' ),
+			getValue: ( { item } ) => item.plan?.product_name_short ?? '',
+			render: ( { item, field } ) => (
+				<PlanES siteSlug={ item.slug } value={ field.getValue( { item } ) } />
+			),
+		},
+	];
+}
+
 export function getFields( {
 	isAutomattician,
 	viewType,
@@ -161,6 +201,31 @@ export function getFields( {
 	viewType?: string;
 } ) {
 	const defaultFields = getDefaultFields();
+	return defaultFields.filter( ( field ) => {
+		if ( field.id === 'is_a8c' && ! isAutomattician ) {
+			return false;
+		}
+
+		if ( field.id === 'icon.ico' && viewType === 'grid' ) {
+			return false;
+		}
+
+		if ( field.id === 'preview' && viewType === 'table' ) {
+			return false;
+		}
+
+		return true;
+	} );
+}
+
+export function getFieldsES( {
+	isAutomattician,
+	viewType,
+}: {
+	isAutomattician?: boolean;
+	viewType?: string;
+} ) {
+	const defaultFields = getDefaultFieldsES();
 	return defaultFields.filter( ( field ) => {
 		if ( field.id === 'is_a8c' && ! isAutomattician ) {
 			return false;

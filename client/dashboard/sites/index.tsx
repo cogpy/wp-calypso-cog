@@ -21,12 +21,12 @@ import { sitesRoute } from '../app/router/sites';
 import { DataViewsEmptyState } from '../components/dataviews-empty-state';
 import { PageHeader } from '../components/page-header';
 import PageLayout from '../components/page-layout';
-import { urlToSlug } from '../utils/url';
 import AddNewSite from './add-new-site';
 import {
 	SitesDataViews,
 	useActions,
 	getFields,
+	getFieldsES,
 	getDefaultView,
 	recordViewChanges,
 } from './dataviews';
@@ -36,7 +36,7 @@ import type {
 	FetchSitesOptions,
 	Site,
 	FetchDashboardSiteListParams,
-	SiteProfileSite,
+	DashboardSiteListSite,
 } from '@automattic/api-core';
 import type { View, Filter } from '@wordpress/dataviews';
 
@@ -64,10 +64,10 @@ function getFetchSiteListParams(
 	view: View
 	// isRestoringAccount: boolean TODO: Add site visibility filtering
 ): FetchDashboardSiteListParams {
-	const dataviewFieldToSiteProfileField: Record< string, keyof SiteProfileSite > = {
-		name: 'blogname',
-		URL: 'url',
-		'icon.ico': 'site_icon',
+	const dataviewFieldToSiteProfileField: Record< string, keyof DashboardSiteListSite > = {
+		name: 'name',
+		url: 'url',
+		'icon.ico': 'icon',
 		backup: 'has_backup',
 		views: 'stats_visitors',
 		plan: 'plan',
@@ -84,7 +84,7 @@ function getFetchSiteListParams(
 		// host
 	};
 
-	const fields = new Set< keyof SiteProfileSite >( [ 'blog_id', 'url' ] ); // Always include ID and URL (to calculate site slug).
+	const fields = new Set< keyof DashboardSiteListSite >( [ 'blog_id', 'slug' ] ); // Always include ID and slug (for navigation).
 	if ( view.showTitle && view.titleField ) {
 		fields.add( dataviewFieldToSiteProfileField[ view.titleField ] );
 	}
@@ -117,45 +117,57 @@ function getFetchSiteListParams(
 	};
 }
 
-function siteProfileSiteToSite( site: SiteProfileSite ): Site {
-	return {
-		ID: site.blog_id ?? 0,
-		slug: urlToSlug( site.url ?? '' ),
-		name: site.blogname ?? '',
-		URL: site.url ?? '',
-		icon: site.site_icon ?? undefined,
-		is_deleted: Boolean( site.deleted ),
-		is_coming_soon: Boolean( site.wpcom_status?.is_coming_soon ),
-		is_private: Boolean( site.private ),
-		is_wpcom_staging_site: Boolean( site.wpcom_status?.is_staging ),
-		subscribers_count: site.total_wpcom_subscribers,
-		plan: site.plan,
-		capabilities: {
-			manage_options: false, // TODO
-			update_plugins: false, // TODO
-		},
-		garden_is_provisioned: null, // TODO
-		garden_name: null, // TODO
-		garden_partner: null, // TODO
-		is_a4a_dev_site: false, // TODO
-		is_a8c: false, // TODO
-		is_garden: false, // TODO
-		is_wpcom_atomic: false, // TODO
-		is_wpcom_flex: false, // TODO
-		is_vip: false, // TODO
-		lang: 'en', // TODO
-		launch_status: false, // TODO
-		site_migration: { in_progress: false, is_complete: false }, // TODO
-		site_owner: 0, // TODO
-		jetpack: false, // TODO
-		jetpack_connection: false, // TODO
-		jetpack_modules: null, // TODO
-		was_ecommerce_trial: false, // TODO
-		was_migration_trial: false, // TODO
-		was_hosting_trial: false, // TODO
-		was_upgraded_from_trial: false, // TODO
-	};
-}
+// function siteProfileSiteToSite( site: DashboardSiteListSite ): Site {
+// 	return {
+// 		ID: site.blog_id ?? 0,
+// 		slug: urlToSlug( site.url ?? '' ),
+// 		name: site.name ?? '',
+// 		URL: site.url ?? '',
+// 		icon: site.icon ?? undefined,
+// 		is_deleted: Boolean( site.deleted ),
+// 		is_coming_soon: Boolean( site.wpcom_status?.is_coming_soon ),
+// 		is_private: Boolean( site.private ),
+// 		is_wpcom_staging_site: Boolean( site.wpcom_status?.is_staging ),
+// 		subscribers_count: site.total_wpcom_subscribers,
+// 		plan: {
+// 			product_id: site.plan?.product_id ?? 0,
+// 			product_slug: '',
+// 			product_name: '',
+// 			product_name_short: site.plan?.product_name_short ?? '',
+// 			expired: false,
+// 			is_free: false,
+// 			license_key: '',
+// 			billing_period: 'Yearly',
+// 			features: {
+// 				active: [],
+// 			},
+// 		},
+// 		capabilities: {
+// 			manage_options: false, // TODO
+// 			update_plugins: false, // TODO
+// 		},
+// 		garden_is_provisioned: null, // TODO
+// 		garden_name: null, // TODO
+// 		garden_partner: null, // TODO
+// 		is_a4a_dev_site: false, // TODO
+// 		is_a8c: false, // TODO
+// 		is_garden: false, // TODO
+// 		is_wpcom_atomic: false, // TODO
+// 		is_wpcom_flex: false, // TODO
+// 		is_vip: false, // TODO
+// 		lang: 'en', // TODO
+// 		launch_status: false, // TODO
+// 		site_migration: { in_progress: false, is_complete: false }, // TODO
+// 		site_owner: 0, // TODO
+// 		jetpack: false, // TODO
+// 		jetpack_connection: false, // TODO
+// 		jetpack_modules: null, // TODO
+// 		was_ecommerce_trial: false, // TODO
+// 		was_migration_trial: false, // TODO
+// 		was_hosting_trial: false, // TODO
+// 		was_upgraded_from_trial: false, // TODO
+// 	};
+// }
 
 /**
  * Enables the correct site query based on the dataviews/v2/es-site-list feature flag.
@@ -180,7 +192,9 @@ function useSiteListQuery( view: View, isRestoringAccount: boolean ) {
 
 	if ( isEnabled( 'dashboard/v2/es-site-list' ) ) {
 		return {
-			sites: siteProfilesQueryResult.data?.sites.map( siteProfileSiteToSite ),
+			sites: [],
+			sitesES: siteProfilesQueryResult.data?.sites,
+			hasNoData: Boolean( siteProfilesQueryResult.data?.sites.length === 0 ),
 			isLoadingSites: siteProfilesQueryResult.isLoading,
 			isPlaceholderData: siteProfilesQueryResult.isPlaceholderData,
 			totalItems: siteProfilesQueryResult.data?.total,
@@ -189,6 +203,8 @@ function useSiteListQuery( view: View, isRestoringAccount: boolean ) {
 
 	return {
 		sites: sitesQueryResult.data,
+		sitesES: [],
+		hasNoData: Boolean( sitesQueryResult.data?.length === 0 ),
 		isLoadingSites: sitesQueryResult.isLoading,
 		isPlaceholderData: sitesQueryResult.isPlaceholderData,
 		totalItems: sitesQueryResult.data?.length,
@@ -217,12 +233,11 @@ export default function Sites() {
 		queryParams: currentSearchParams,
 	} );
 
-	const { sites, isLoadingSites, isPlaceholderData, totalItems } = useSiteListQuery(
-		view,
-		isRestoringAccount
-	);
+	const { sites, sitesES, isLoadingSites, isPlaceholderData, hasNoData, totalItems } =
+		useSiteListQuery( view, isRestoringAccount );
 
 	const fields = getFields( { isAutomattician, viewType: view.type } );
+	const fieldsES = getFieldsES( { isAutomattician, viewType: view.type } );
 	const actions = useActions();
 
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
@@ -291,10 +306,12 @@ export default function Sites() {
 				<SitesDataViews
 					view={ view }
 					sites={ sites ?? [] }
+					sitesES={ sitesES ?? [] }
 					totalItems={ totalItems ?? 0 }
 					fields={ fields }
+					fieldsES={ fieldsES }
 					actions={ actions }
-					isLoading={ isLoadingSites || ( isPlaceholderData && sites?.length === 0 ) }
+					isLoading={ isLoadingSites || ( isPlaceholderData && hasNoData ) }
 					empty={
 						<DataViewsEmptyState
 							title={ emptyTitle }

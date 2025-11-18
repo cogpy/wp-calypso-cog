@@ -1,3 +1,4 @@
+import { isEnabled } from '@automattic/calypso-config';
 import type { AnalyticsClient } from '../../app/analytics';
 import type { User } from '@automattic/api-core';
 import type { Operator, SortDirection, SupportedLayouts, View } from '@wordpress/dataviews';
@@ -10,9 +11,10 @@ export const DEFAULT_LAYOUTS: SupportedLayouts = {
 		showLevels: false,
 		showMedia: true,
 		showTitle: true,
+		showDescription: true,
 		mediaField: 'icon.ico',
 		titleField: 'name',
-		descriptionField: 'URL',
+		descriptionField: isEnabled( 'dashboard/v2/es-site-list' ) ? 'url' : 'URL',
 	},
 	grid: {
 		layout: {
@@ -21,9 +23,10 @@ export const DEFAULT_LAYOUTS: SupportedLayouts = {
 		showLevels: false,
 		showMedia: true,
 		showTitle: true,
+		showDescription: true,
 		mediaField: 'preview',
 		titleField: 'name',
-		descriptionField: 'URL',
+		descriptionField: isEnabled( 'dashboard/v2/es-site-list' ) ? 'url' : 'URL',
 	},
 };
 
@@ -35,8 +38,13 @@ export const DEFAULT_PER_PAGE = 12;
 
 const DEFAULT_VIEW: Partial< View > = {
 	perPage: DEFAULT_PER_PAGE,
-	fields: [ 'status', 'visitors', 'subscribers_count', 'plan' ],
-	sort: { field: 'name', direction: 'asc' as SortDirection },
+	fields: isEnabled( 'dashboard/v2/es-site-list' )
+		? [ 'plan' ]
+		: [ 'status', 'visitors', 'subscribers_count', 'plan' ],
+	sort: {
+		field: isEnabled( 'dashboard/v2/es-site-list' ) ? 'url' : 'name',
+		direction: 'asc' as SortDirection,
+	},
 };
 
 export function getDefaultView( {

@@ -4,9 +4,9 @@ import { __ } from '@wordpress/i18n';
 import { DataViews } from '../../app/dataviews';
 import { DataViewsCard } from '../../components/dataviews-card';
 import { GuidedTourContextProvider, GuidedTourStep } from '../../components/guided-tour';
-import { SiteLink } from '../site-fields';
+import { SiteLink, SiteLinkES } from '../site-fields';
 import { DEFAULT_LAYOUTS, DEFAULT_CONFIG } from './views';
-import type { Site } from '@automattic/api-core';
+import type { DashboardSiteListSite, Site } from '@automattic/api-core';
 import type { Action, Field, View } from '@wordpress/dataviews';
 import type { ReactNode } from 'react';
 
@@ -14,7 +14,7 @@ import type { ReactNode } from 'react';
  * Meant to stand in for the dataview's filterSortAndPaginate function when
  * the filtering has already been done on the backend by elasticsearch.
  */
-function esFilterSortAndPaginate( sites: Site[], view: View, totalItems: number ) {
+function esFilterSortAndPaginate( sites: DashboardSiteListSite[], view: View, totalItems: number ) {
 	return {
 		data: sites,
 		paginationInfo: {
@@ -27,8 +27,10 @@ function esFilterSortAndPaginate( sites: Site[], view: View, totalItems: number 
 export const SitesDataViews = ( {
 	view,
 	sites,
+	sitesES,
 	totalItems,
 	fields,
+	fieldsES,
 	actions,
 	isLoading,
 	empty,
@@ -37,37 +39,61 @@ export const SitesDataViews = ( {
 }: {
 	view: View;
 	sites: Site[];
+	sitesES: DashboardSiteListSite[];
 	totalItems: number;
 	fields: Field< Site >[];
+	fieldsES: Field< DashboardSiteListSite >[];
 	actions: Action< Site >[];
 	isLoading: boolean;
 	empty: ReactNode;
 	onChangeView: ( view: View ) => void;
 	onResetView?: () => void;
 } ) => {
-	const { data: filteredData, paginationInfo } = isEnabled( 'dashboard/v2/es-site-list' )
-		? esFilterSortAndPaginate( sites, view, totalItems )
-		: filterSortAndPaginate( sites, view, fields );
+	const { data: filteredData, paginationInfo } = filterSortAndPaginate( sites, view, fields );
+
+	const { data: filteredDataES, paginationInfo: paginationInfoES } = esFilterSortAndPaginate(
+		sitesES,
+		view,
+		totalItems
+	);
+
+	const dv = isEnabled( 'dashboard/v2/es-site-list' ) ? (
+		<DataViews< DashboardSiteListSite >
+			getItemId={ ( item ) => '' + item.blog_id?.toString() + item.url }
+			data={ filteredDataES }
+			fields={ fieldsES }
+			// TODO: actions={ actions }
+			view={ view }
+			isLoading={ isLoading }
+			onChangeView={ onChangeView }
+			onResetView={ onResetView }
+			defaultLayouts={ DEFAULT_LAYOUTS }
+			paginationInfo={ paginationInfoES }
+			config={ DEFAULT_CONFIG }
+			empty={ empty }
+			renderItemLink={ ( { item, ...props } ) => <SiteLinkES { ...props } site={ item } /> }
+		/>
+	) : (
+		<DataViews< Site >
+			getItemId={ ( item ) => item.ID.toString() }
+			data={ filteredData }
+			fields={ fields }
+			actions={ actions }
+			view={ view }
+			isLoading={ isLoading }
+			onChangeView={ onChangeView }
+			onResetView={ onResetView }
+			defaultLayouts={ DEFAULT_LAYOUTS }
+			paginationInfo={ paginationInfo }
+			config={ DEFAULT_CONFIG }
+			empty={ empty }
+			renderItemLink={ ( { item, ...props } ) => <SiteLink { ...props } site={ item } /> }
+		/>
+	);
 
 	return (
 		<>
-			<DataViewsCard>
-				<DataViews< Site >
-					getItemId={ ( item ) => item.ID.toString() + item.URL }
-					data={ filteredData }
-					fields={ fields }
-					actions={ actions }
-					view={ view }
-					isLoading={ isLoading }
-					onChangeView={ onChangeView }
-					onResetView={ onResetView }
-					defaultLayouts={ DEFAULT_LAYOUTS }
-					paginationInfo={ paginationInfo }
-					config={ DEFAULT_CONFIG }
-					empty={ empty }
-					renderItemLink={ ( { item, ...props } ) => <SiteLink { ...props } site={ item } /> }
-				/>
-			</DataViewsCard>
+			<DataViewsCard>{ dv }</DataViewsCard>
 			<GuidedTourContextProvider
 				tourId="hosting-dashboard-tours-sites"
 				isSkippable

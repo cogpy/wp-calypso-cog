@@ -1,40 +1,42 @@
-export interface SiteProfileSite {
-	blog_id?: number;
-	url?: string;
-	blogname?: string;
+export interface DashboardSiteListSite {
+	badge?: null | 'staging' | 'trial' | 'p2';
+	blog_id: number; // Site ID is always fetched
+	deleted?: boolean;
+	has_backup?: boolean;
+	name?: string;
+	plan?: null | {
+		product_id: number;
+		product_name_short: string;
+	};
+	private?: boolean;
+	icon?: null | {
+		ico: string;
+		img: string;
+	};
+	slug: string; // Slug is always fetched
 	stats_visitors?: {
 		day: number;
 		week: number;
 		month: number;
 	};
-	has_backup?: boolean;
-	site_icon?: null | {
-		ico: string;
-		img: string;
-	};
+	total_wpcom_subscribers?: number;
+	url?: { value: string; with_scheme: string };
 	wpcom_status?: {
 		is_staging: boolean;
 		is_coming_soon: boolean;
 		is_redirect: boolean;
 	};
-	private?: boolean;
-	deleted?: boolean;
-	total_wpcom_subscribers?: number;
-	plan?: null | {
-		product_id: number;
-		product_name_short: string;
-	};
 }
 
 export interface DashboardSiteListResponse {
-	sites: SiteProfileSite[];
+	sites: DashboardSiteListSite[];
 	total: number;
 }
 
 export interface FetchDashboardSiteListParams {
-	fields?: ( keyof SiteProfileSite )[];
+	fields?: ( keyof DashboardSiteListSite )[];
 	s?: string;
-	sort_by?: keyof SiteProfileSite;
+	sort_by?: keyof DashboardSiteListSite;
 	sort_direction?: 'asc' | 'desc';
 	page?: number;
 	per_page?: number;
