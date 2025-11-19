@@ -303,7 +303,10 @@ export default function CancelPurchase() {
 		) {
 			steps = [ NEXT_ADVENTURE_STEP ];
 		} else if ( state.upsell ) {
-			steps = [ FEEDBACK_STEP, UPSELL_STEP, NEXT_ADVENTURE_STEP ];
+			steps = [ FEEDBACK_STEP ];
+			if ( ! hasExpired ) {
+				steps.push( UPSELL_STEP, NEXT_ADVENTURE_STEP );
+			}
 		} else if ( questionTwoOrder?.length ) {
 			steps = [ FEEDBACK_STEP, NEXT_ADVENTURE_STEP ];
 		}
