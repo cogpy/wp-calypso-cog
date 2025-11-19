@@ -10,6 +10,7 @@ import { getSiteDisplayUrl } from '../../utils/site-url';
 import { getFormattedWordPressVersion } from '../../utils/wp-version';
 import {
 	EngagementStat,
+	EngagementStatES,
 	LastBackup,
 	MediaStorage,
 	Name,
@@ -164,13 +165,11 @@ function getDefaultFieldsES(): Field< DashboardSiteListSite >[] {
 			enableHiding: false,
 			enableGlobalSearch: false, // TODO
 			getValue: ( { item } ) => item.name ?? '',
-			render: ( { field, item } ) => (
-				<NameES siteSlug={ item.slug } value={ field.getValue( { item } ) } />
-			),
+			render: ( { field, item } ) => <NameES site={ item } value={ field.getValue( { item } ) } />,
 			enableSorting: false, // TODO
 		},
 		{
-			id: 'url',
+			id: 'URL',
 			label: __( 'URL' ),
 			enableGlobalSearch: true,
 			getValue: ( { item } ) => item.url?.value ?? '',
@@ -183,12 +182,23 @@ function getDefaultFieldsES(): Field< DashboardSiteListSite >[] {
 			enableSorting: false,
 		},
 		{
+			id: 'subscribers_count',
+			getValue: ( { item } ) => item.total_wpcom_subscribers,
+			label: __( 'Subscribers' ),
+		},
+		{
 			id: 'plan',
 			label: __( 'Plan' ),
 			getValue: ( { item } ) => item.plan?.product_name_short ?? '',
 			render: ( { item, field } ) => (
 				<PlanES siteSlug={ item.slug } value={ field.getValue( { item } ) } />
 			),
+		},
+		{
+			id: 'visitors',
+			label: __( '7-day visitors' ),
+			render: ( { item, field } ) => <EngagementStatES value={ field.getValue( { item } ) } />,
+			enableSorting: false,
 		},
 	];
 }

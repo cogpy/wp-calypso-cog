@@ -14,7 +14,7 @@ export const DEFAULT_LAYOUTS: SupportedLayouts = {
 		showDescription: true,
 		mediaField: 'icon.ico',
 		titleField: 'name',
-		descriptionField: isEnabled( 'dashboard/v2/es-site-list' ) ? 'url' : 'URL',
+		descriptionField: 'URL',
 	},
 	grid: {
 		layout: {
@@ -26,7 +26,7 @@ export const DEFAULT_LAYOUTS: SupportedLayouts = {
 		showDescription: true,
 		mediaField: 'preview',
 		titleField: 'name',
-		descriptionField: isEnabled( 'dashboard/v2/es-site-list' ) ? 'url' : 'URL',
+		descriptionField: 'URL',
 	},
 };
 
@@ -39,7 +39,7 @@ export const DEFAULT_PER_PAGE = 12;
 const DEFAULT_VIEW: Partial< View > = {
 	perPage: DEFAULT_PER_PAGE,
 	fields: isEnabled( 'dashboard/v2/es-site-list' )
-		? [ 'plan' ]
+		? [ 'visitors', 'subscribers_count', 'plan' ]
 		: [ 'status', 'visitors', 'subscribers_count', 'plan' ],
 	sort: {
 		field: isEnabled( 'dashboard/v2/es-site-list' ) ? 'url' : 'name',

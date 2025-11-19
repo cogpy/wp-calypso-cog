@@ -4,7 +4,7 @@ export interface DashboardSiteListSite {
 	deleted?: boolean;
 	has_backup?: boolean;
 	name?: string;
-	plan?: null | {
+	plan?: {
 		product_id: number;
 		product_name_short: string;
 	};
@@ -14,11 +14,7 @@ export interface DashboardSiteListSite {
 		img: string;
 	};
 	slug: string; // Slug is always fetched
-	stats_visitors?: {
-		day: number;
-		week: number;
-		month: number;
-	};
+	visitors?: null | number;
 	total_wpcom_subscribers?: number;
 	url?: { value: string; with_scheme: string };
 	wpcom_status?: {

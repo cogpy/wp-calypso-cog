@@ -125,30 +125,25 @@ export function Name( { site, value }: { site: Site; value: string } ) {
 	);
 }
 
-export function NameES( { siteSlug, value }: { siteSlug: string; value: string } ) {
-	const { data: site } = useQuery( siteBySlugQuery( siteSlug ) );
-
+export function NameES( { site, value }: { site: DashboardSiteListSite; value: string } ) {
 	const renderBadge = () => {
-		if ( site?.is_wpcom_staging_site ) {
-			return <Badge>{ __( 'Staging' ) }</Badge>;
+		switch ( site.badge ) {
+			case 'staging':
+				return <Badge>{ __( 'Staging' ) }</Badge>;
+			case 'trial':
+				return <Badge>{ __( 'Trial' ) }</Badge>;
+			case 'p2':
+				return <Badge>{ __( 'P2' ) }</Badge>;
+			default:
+				break;
 		}
-
-		if ( site && isSitePlanTrial( site ) ) {
-			return <Badge>{ __( 'Trial' ) }</Badge>;
-		}
-
-		if ( site && isP2( site ) ) {
-			return <Badge>{ __( 'P2' ) }</Badge>;
-		}
-
-		return null;
 	};
 
 	const badge = renderBadge();
 
 	return (
 		<HStack justify="flex-start" alignment="center" spacing={ 1 }>
-			{ site?.is_deleted ? (
+			{ site.deleted ? (
 				<Text variant="muted">{ value }</Text>
 			) : (
 				<span style={ titleFieldTextOverflowStyles }>{ value }</span>
@@ -262,6 +257,10 @@ export function EngagementStat( {
 	};
 
 	return <span ref={ ref }>{ renderContent() }</span>;
+}
+
+export function EngagementStatES( { value }: { value: number | null } ) {
+	return typeof value !== 'number' ? <IneligibleIndicator /> : value;
 }
 
 export function LastBackup( { site }: { site: Site } ) {

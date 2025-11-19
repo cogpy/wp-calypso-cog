@@ -66,17 +66,17 @@ function getFetchSiteListParams(
 ): FetchDashboardSiteListParams {
 	const dataviewFieldToSiteProfileField: Record< string, keyof DashboardSiteListSite > = {
 		name: 'name',
-		url: 'url',
+		URL: 'url',
 		'icon.ico': 'icon',
 		backup: 'has_backup',
-		views: 'stats_visitors',
+		// views: 'stats_views',
 		plan: 'plan',
 		// wp_version
 		// is_a8c
 		// preview
 		// last_published
 		// uptime
-		// visitors
+		visitors: 'visitors',
 		subscribers_count: 'total_wpcom_subscribers',
 		// links
 		// php_version
@@ -84,9 +84,10 @@ function getFetchSiteListParams(
 		// host
 	};
 
-	const fields = new Set< keyof DashboardSiteListSite >( [ 'blog_id', 'slug' ] ); // Always include ID and slug (for navigation).
+	const fields = new Set< keyof DashboardSiteListSite >( [ 'blog_id', 'slug', 'deleted' ] ); // Always include ID and slug (for navigation), and deleted (for styling)
 	if ( view.showTitle && view.titleField ) {
 		fields.add( dataviewFieldToSiteProfileField[ view.titleField ] );
+		fields.add( 'badge' );
 	}
 	if ( view.showMedia && view.mediaField ) {
 		fields.add( dataviewFieldToSiteProfileField[ view.mediaField ] );
@@ -116,58 +117,6 @@ function getFetchSiteListParams(
 		per_page: view.perPage,
 	};
 }
-
-// function siteProfileSiteToSite( site: DashboardSiteListSite ): Site {
-// 	return {
-// 		ID: site.blog_id ?? 0,
-// 		slug: urlToSlug( site.url ?? '' ),
-// 		name: site.name ?? '',
-// 		URL: site.url ?? '',
-// 		icon: site.icon ?? undefined,
-// 		is_deleted: Boolean( site.deleted ),
-// 		is_coming_soon: Boolean( site.wpcom_status?.is_coming_soon ),
-// 		is_private: Boolean( site.private ),
-// 		is_wpcom_staging_site: Boolean( site.wpcom_status?.is_staging ),
-// 		subscribers_count: site.total_wpcom_subscribers,
-// 		plan: {
-// 			product_id: site.plan?.product_id ?? 0,
-// 			product_slug: '',
-// 			product_name: '',
-// 			product_name_short: site.plan?.product_name_short ?? '',
-// 			expired: false,
-// 			is_free: false,
-// 			license_key: '',
-// 			billing_period: 'Yearly',
-// 			features: {
-// 				active: [],
-// 			},
-// 		},
-// 		capabilities: {
-// 			manage_options: false, // TODO
-// 			update_plugins: false, // TODO
-// 		},
-// 		garden_is_provisioned: null, // TODO
-// 		garden_name: null, // TODO
-// 		garden_partner: null, // TODO
-// 		is_a4a_dev_site: false, // TODO
-// 		is_a8c: false, // TODO
-// 		is_garden: false, // TODO
-// 		is_wpcom_atomic: false, // TODO
-// 		is_wpcom_flex: false, // TODO
-// 		is_vip: false, // TODO
-// 		lang: 'en', // TODO
-// 		launch_status: false, // TODO
-// 		site_migration: { in_progress: false, is_complete: false }, // TODO
-// 		site_owner: 0, // TODO
-// 		jetpack: false, // TODO
-// 		jetpack_connection: false, // TODO
-// 		jetpack_modules: null, // TODO
-// 		was_ecommerce_trial: false, // TODO
-// 		was_migration_trial: false, // TODO
-// 		was_hosting_trial: false, // TODO
-// 		was_upgraded_from_trial: false, // TODO
-// 	};
-// }
 
 /**
  * Enables the correct site query based on the dataviews/v2/es-site-list feature flag.

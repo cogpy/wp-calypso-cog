@@ -59,7 +59,7 @@ export const SitesDataViews = ( {
 
 	const dv = isEnabled( 'dashboard/v2/es-site-list' ) ? (
 		<DataViews< DashboardSiteListSite >
-			getItemId={ ( item ) => '' + item.blog_id?.toString() + item.url }
+			getItemId={ ( item ) => '' + item.blog_id?.toString() + item.url?.value }
 			data={ filteredDataES }
 			fields={ fieldsES }
 			// TODO: actions={ actions }
