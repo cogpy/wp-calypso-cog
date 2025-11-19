@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import { isSimplifiedOnboarding } from 'calypso/landing/stepper/hooks/use-simplified-onboarding';
 import { SIGNUP_DOMAIN_ORIGIN } from 'calypso/lib/analytics/signup';
 import { addSurvicate } from 'calypso/lib/analytics/survicate';
-import { loadExperimentAssignment } from 'calypso/lib/explat';
+import { loadExperimentAssignment, useExperiment } from 'calypso/lib/explat';
 import { pathToUrl } from 'calypso/lib/url';
 import {
 	persistSignupDestination,
@@ -36,6 +36,8 @@ const withLocale = ( url: string, locale: string ) => {
 	return locale && locale !== 'en' ? `${ url }/${ locale }` : url;
 };
 
+const POST_CHECKOUT_SETUP_YOUR_SITE_EXPERIMENT_SLUG = 'calypso_post_checkout_setup_your_site_step';
+
 function initialize() {
 	const steps = [
 		STEPS.DOMAIN_SEARCH,
@@ -57,6 +59,12 @@ const onboarding: FlowV2< typeof initialize > = {
 	initialize,
 	useStepNavigation( currentStepSlug, navigate ) {
 		const flowName = this.name;
+
+		const [ isLoadingExperiment, experimentAssignment ] = useExperiment(
+			POST_CHECKOUT_SETUP_YOUR_SITE_EXPERIMENT_SLUG
+		);
+		const shouldShowNewStep =
+			! isLoadingExperiment && experimentAssignment?.variationName === 'treatment';
 
 		const {
 			setDomain,
@@ -211,6 +219,13 @@ const onboarding: FlowV2< typeof initialize > = {
 					return navigate( 'processing', undefined, true );
 				case 'post-checkout-onboarding':
 					setShouldShowNotification( providedDependencies?.siteId as number );
+
+					if ( shouldShowNewStep ) {
+						return navigate( 'post-checkout-setup-your-site' );
+					}
+
+					return navigate( 'processing' );
+				case 'post-checkout-setup-your-site':
 					return navigate( 'processing' );
 				case 'processing': {
 					const [ destination, backDestination ] =
@@ -304,9 +319,10 @@ const onboarding: FlowV2< typeof initialize > = {
 			}
 		}, [ isLoggedIn, currentStepSlug ] );
 
-		// Preload the visual split experiment
+		// Preload experiments
 		useEffect( () => {
 			loadExperimentAssignment( 'calypso_plans_page_visual_separation_2025_09_v2' );
+			loadExperimentAssignment( POST_CHECKOUT_SETUP_YOUR_SITE_EXPERIMENT_SLUG );
 		}, [] );
 	},
 };
