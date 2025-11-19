@@ -16,6 +16,7 @@ import {
 	createAlipayMethod,
 	createAlipayPaymentMethodStore,
 	createRazorpayMethod,
+	createRazorpayPaymentMethodStore,
 	isValueTruthy,
 	translateCheckoutPaymentMethodToWpcomPaymentMethod,
 	type StoredPaymentMethod,
@@ -374,15 +375,18 @@ function useCreateRazorpay( {
 		razorpayConfiguration &&
 		isEnabled( 'checkout/razorpay' );
 
+	const paymentMethodStore = useMemo( () => createRazorpayPaymentMethodStore(), [] );
+
 	return useMemo( () => {
 		return isRazorpayReady && razorpayConfiguration && cartKey
 			? createRazorpayMethod( {
 					razorpayConfiguration,
 					cartKey,
 					submitButtonContent: <CheckoutSubmitButtonContent />,
+					store: paymentMethodStore,
 			  } )
 			: null;
-	}, [ razorpayConfiguration, isRazorpayReady, cartKey ] );
+	}, [ razorpayConfiguration, isRazorpayReady, cartKey, paymentMethodStore ] );
 }
 
 /**
