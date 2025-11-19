@@ -27,9 +27,9 @@
 	"dependencies": {
 		"@automattic/command-palette": "workspace:^",
 		"@automattic/sites": "workspace:^",
-		"@wordpress/data": "^10.23.0",
-		"@wordpress/dom-ready": "^4.23.0",
-		"@wordpress/i18n": "^5.23.0",
+		"@wordpress/data": "^10.35.0",
+		"@wordpress/dom-ready": "^4.35.0",
+		"@wordpress/i18n": "^6.8.0",
 		"calypso": "workspace:^",
 		"i18n-calypso": "workspace:^",
 		"react": "^18.3.1",
