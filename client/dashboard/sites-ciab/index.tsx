@@ -154,8 +154,10 @@ export default function CIABSites() {
 				<SitesDataViews
 					view={ view }
 					sites={ sites ?? [] }
+					sitesES={ [] }
 					totalItems={ sites?.length ?? 0 }
 					fields={ fields }
+					fieldsES={ [] }
 					actions={ actions }
 					isLoading={ isLoadingSites || ( isPlaceholderData && sites.length === 0 ) }
 					empty={
