@@ -438,9 +438,7 @@ export default connect(
 			isFromAkismet: isAkismetRedirect(
 				new URLSearchParams( getRedirectToOriginal( state )?.split( '?' )[ 1 ] ).get( 'back' )
 			),
-			isFromPassport: isPassportRedirect(
-				new URLSearchParams( getRedirectToOriginal( state )?.split( '?' )[ 1 ] ).get( 'back' )
-			),
+			isFromPassport: isPassportRedirect( getRedirectToOriginal( state ) ),
 			isWooJPC: isWooJPCFlow( state ),
 			isWCCOM: getIsWCCOM( state ),
 			isWoo: getIsWoo( state ),
