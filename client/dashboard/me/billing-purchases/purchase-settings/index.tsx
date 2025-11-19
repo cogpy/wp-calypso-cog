@@ -1095,7 +1095,9 @@ export default function PurchaseSettings() {
 											{ __( 'Upgrade' ) }
 										</Button>
 									) }
-									<PurchaseActionMenu purchase={ purchase } />
+									<PageHeader.ActionMenu>
+										<PurchaseActionMenu purchase={ purchase } />
+									</PageHeader.ActionMenu>
 								</HStack>
 							)
 						}
@@ -1162,7 +1164,7 @@ export default function PurchaseSettings() {
 							title={ __( 'Site' ) }
 							heading={ site.name }
 							description={ purchase.site_slug }
-							link={ `/v2/sites/${ purchase.site_slug }` }
+							link={ `/sites/${ purchase.site_slug }` }
 						/>
 					) }
 					<OverviewCard
