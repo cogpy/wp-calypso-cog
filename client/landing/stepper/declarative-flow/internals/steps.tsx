@@ -338,6 +338,11 @@ export const STEPS = {
 		asyncComponent: () => import( './steps-repository/post-checkout/post-checkout-onboarding' ),
 	},
 
+	POST_CHECKOUT_SETUP_YOUR_SITE_STEP: {
+		slug: 'post-checkout-setup-your-site',
+		asyncComponent: () => import( './steps-repository/post-checkout-setup-your-site' ),
+	},
+
 	SEGMENTATION_SURVEY: {
 		slug: 'segmentation-survey',
 		asyncComponent: () => import( './steps-repository/segmentation-survey' ),
