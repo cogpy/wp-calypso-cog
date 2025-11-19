@@ -285,6 +285,7 @@ export default function CancelPurchase() {
 		let steps = [ FEEDBACK_STEP ];
 		const isJetpack = purchase.is_jetpack_plan_or_product;
 		const skipRemovePlanSurvey = purchase.is_plan && userHasCompletedCancelSurveyForPurchase;
+		const hasExpired = purchase.expiry_status === 'expired';
 
 		if (
 			isPartnerPurchase( purchase ) &&
@@ -311,24 +312,26 @@ export default function CancelPurchase() {
 			steps.push( ATOMIC_REVERT_STEP );
 		}
 
-		if ( skipRemovePlanSurvey ) {
-			if ( steps.includes( FEEDBACK_STEP ) ) {
-				steps = steps.filter( ( step ) => step !== FEEDBACK_STEP );
-			}
-			if ( steps.includes( NEXT_ADVENTURE_STEP ) ) {
-				steps = steps.filter( ( step ) => step !== NEXT_ADVENTURE_STEP );
+		if ( skipRemovePlanSurvey || hasExpired ) {
+			if ( skipRemovePlanSurvey ) {
+				if ( steps.includes( FEEDBACK_STEP ) ) {
+					steps = steps.filter( ( step ) => step !== FEEDBACK_STEP );
+				}
+				if ( steps.includes( NEXT_ADVENTURE_STEP ) ) {
+					steps = steps.filter( ( step ) => step !== NEXT_ADVENTURE_STEP );
+				}
 			}
 			steps = [ REMOVE_PLAN_STEP, ...steps ];
 		}
-
 		return steps;
 	}, [
 		purchase,
-		availableJetpackSurveySteps,
-		flowType,
-		questionTwoOrder?.length,
+		userHasCompletedCancelSurveyForPurchase,
 		state.upsell,
 		state.willAtomicSiteRevert,
+		questionTwoOrder?.length,
+		flowType,
+		availableJetpackSurveySteps,
 	] );
 
 	const getFeaturesFromApiForProduct = () => {
