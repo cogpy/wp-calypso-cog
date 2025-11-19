@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { useTranslate } from 'i18n-calypso';
 import AkismetLogo from 'calypso/components/akismet-logo';
 import JetpackLogo from 'calypso/components/jetpack-logo';
+import PassportLogo from 'calypso/components/passport-logo';
 import CalypsoShoppingCartProvider from 'calypso/my-sites/checkout/calypso-shopping-cart-provider';
 import { DefaultMasterbarContact } from 'calypso/my-sites/checkout/checkout-thank-you/redesign-v2/masterbar-styled/default-contact';
 import {
@@ -52,6 +53,12 @@ const CheckoutMasterbar = ( {
 			return 'akismet';
 		}
 
+		// Temporary workaround to test the branding for Passport checkout page.
+		// TODO: Remove this once we have a better way to identify Passport checkout pages.
+		if ( window.location.href.includes( 'passport' ) ) {
+			return 'passport';
+		}
+
 		if ( isGravatarDomain ) {
 			return 'gravatar';
 		}
@@ -70,6 +77,7 @@ const CheckoutMasterbar = ( {
 				'masterbar--is-wpcom': checkoutType === 'wpcom',
 				'masterbar--is-jetpack': checkoutType === 'jetpack',
 				'masterbar--is-akismet': checkoutType === 'akismet',
+				'masterbar--is-passport': checkoutType === 'passport',
 			} ) }
 		>
 			<div className="masterbar__secure-checkout">
@@ -93,6 +101,7 @@ const CheckoutMasterbar = ( {
 					<JetpackLogo className="masterbar__jetpack-wordmark" full />
 				) }
 				{ checkoutType === 'akismet' && <AkismetLogo className="masterbar__akismet-wordmark" /> }
+				{ checkoutType === 'passport' && <PassportLogo className="masterbar__passport-wordmark" /> }
 				{ checkoutType === 'gravatar' && <GravatarTextLogo /> }
 				<span className="masterbar__secure-checkout-text">{ translate( 'Secure checkout' ) }</span>
 			</div>

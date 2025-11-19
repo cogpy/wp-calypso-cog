@@ -115,7 +115,8 @@ body.is-mobile-app-view {
 		padding-inline-end: 1.5em;
 
 		&.masterbar--is-akismet,
-		&.masterbar--is-jetpack {
+		&.masterbar--is-jetpack,
+		&.masterbar--is-passport {
 			padding-inline-start: 1.5em;
 		}
 
@@ -1080,7 +1081,8 @@ a.masterbar__quick-language-switcher {
 	align-items: center;
 
 	.masterbar--is-akismet &,
-	.masterbar--is-jetpack & {
+	.masterbar--is-jetpack &,
+	.masterbar--is-passport & {
 		column-gap: 1em;
 	}
 
