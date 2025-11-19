@@ -39,6 +39,7 @@ import { createPayPalMethod, createPayPalStore } from '../../payment-methods/pay
 import { createPayPal } from '../../payment-methods/paypal-js';
 import { createPixPaymentMethod } from '../../payment-methods/pix';
 import { createWeChatMethod, createWeChatPaymentMethodStore } from '../../payment-methods/wechat';
+import { useCachedContactDetails } from '../use-cached-contact-details';
 import useCreateExistingCards from './use-create-existing-cards';
 import type { RazorpayConfiguration, RazorpayLoadingError } from '@automattic/calypso-razorpay';
 import type { StripeConfiguration, StripeLoadingError } from '@automattic/calypso-stripe';
@@ -377,6 +378,9 @@ function useCreateRazorpay( {
 
 	const paymentMethodStore = useMemo( () => createRazorpayPaymentMethodStore(), [] );
 
+	// Fetch cached contact details for prefilling address fields
+	const { contactDetails } = useCachedContactDetails( { isLoggedOut: false } );
+
 	return useMemo( () => {
 		return isRazorpayReady && razorpayConfiguration && cartKey
 			? createRazorpayMethod( {
@@ -384,9 +388,10 @@ function useCreateRazorpay( {
 					cartKey,
 					submitButtonContent: <CheckoutSubmitButtonContent />,
 					store: paymentMethodStore,
+					contactDetails: contactDetails ?? undefined,
 			  } )
 			: null;
-	}, [ razorpayConfiguration, isRazorpayReady, cartKey, paymentMethodStore ] );
+	}, [ razorpayConfiguration, isRazorpayReady, cartKey, paymentMethodStore, contactDetails ] );
 }
 
 /**
