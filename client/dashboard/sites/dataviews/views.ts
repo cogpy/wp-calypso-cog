@@ -42,7 +42,7 @@ const DEFAULT_VIEW: Partial< View > = {
 		? [ 'visitors', 'subscribers_count', 'plan' ]
 		: [ 'status', 'visitors', 'subscribers_count', 'plan' ],
 	sort: {
-		field: isEnabled( 'dashboard/v2/es-site-list' ) ? 'url' : 'name',
+		field: isEnabled( 'dashboard/v2/es-site-list' ) ? 'URL' : 'name',
 		direction: 'asc' as SortDirection,
 	},
 };
