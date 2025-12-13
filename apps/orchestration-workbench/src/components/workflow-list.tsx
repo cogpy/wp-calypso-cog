@@ -1,19 +1,23 @@
 import { Button } from '@wordpress/components';
 import page from '@automattic/calypso-router';
 import { useTranslate } from 'i18n-calypso';
+import { useSelector } from 'react-redux';
+import { getWorkflows } from '../state/workflows/selectors';
 
 import './workflow-list.scss';
 
 export function WorkflowList() {
 	const translate = useTranslate();
+	const workflows = useSelector( getWorkflows );
 
 	const handleCreateWorkflow = () => {
 		page( '/builder' );
 	};
 
-	return (
-		<div className="workflow-list">
-			<div className="workflow-list__empty">
+	if ( workflows.length === 0 ) {
+		return (
+			<div className="workflow-list">
+				<div className="workflow-list__empty">
 				<div className="workflow-list__empty-icon">
 					<svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path
@@ -55,6 +59,38 @@ export function WorkflowList() {
 				<Button variant="primary" size="default" onClick={ handleCreateWorkflow }>
 					{ translate( 'Create Workflow' ) }
 				</Button>
+			</div>
+		</div>
+		);
+	}
+
+	return (
+		<div className="workflow-list">
+			<div className="workflow-list__items">
+				{ workflows.map( ( workflow ) => (
+					<div key={ workflow.id } className="workflow-list__item">
+						<div className="workflow-list__item-header">
+							<h3 className="workflow-list__item-name">{ workflow.name }</h3>
+							<span className={ `workflow-list__item-status workflow-list__item-status--${ workflow.status }` }>
+								{ workflow.status }
+							</span>
+						</div>
+						<div className="workflow-list__item-tasks">
+							{ translate( '%(count)d task', '%(count)d tasks', {
+								count: workflow.tasks.length,
+								args: { count: workflow.tasks.length },
+							} ) }
+						</div>
+						<div className="workflow-list__item-stats">
+							<span className="workflow-list__item-stat">
+								✓ { workflow.stats.successCount } { translate( 'completed' ) }
+							</span>
+							<span className="workflow-list__item-stat workflow-list__item-stat--error">
+								✗ { workflow.stats.failureCount } { translate( 'failed' ) }
+							</span>
+						</div>
+					</div>
+				) ) }
 			</div>
 		</div>
 	);

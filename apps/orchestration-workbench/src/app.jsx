@@ -21,6 +21,7 @@ import { combineReducers, addReducerEnhancer } from 'calypso/state/utils';
 import setLocale from './lib/set-locale';
 import { setupContextMiddleware } from './page-middleware/setup-context';
 import registerOrchestrationWorkbenchPages from './routes';
+import workflowsReducer from './state/workflows/reducer';
 import themes from './themes';
 
 import 'calypso/assets/stylesheets/style.scss';
@@ -36,6 +37,7 @@ async function AppBoot() {
 	const rootReducer = combineReducers( {
 		currentUser,
 		sites,
+		workflows: workflowsReducer,
 	} );
 
 	const initialState = config( 'initial_state' );

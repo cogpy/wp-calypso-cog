@@ -2,20 +2,24 @@ import { Button, Card, CardBody } from '@wordpress/components';
 import page from '@automattic/calypso-router';
 import { useTranslate } from 'i18n-calypso';
 import { useState } from '@wordpress/element';
+import { useDispatch } from 'react-redux';
 import { WorkflowCanvas } from '../components/workflow-canvas';
 import { TaskLibrary } from '../components/task-library';
+import { createWorkflow } from '../state/workflows/actions';
 
 import './workflow-builder.scss';
 
 export function WorkflowBuilder() {
 	const translate = useTranslate();
+	const dispatch = useDispatch();
 	const [ workflowName, setWorkflowName ] = useState( '' );
 	const [ selectedTasks, setSelectedTasks ] = useState( [] );
 
 	const handleSaveWorkflow = () => {
-		// Placeholder for save functionality
-		console.log( 'Saving workflow:', { workflowName, selectedTasks } );
-		page( '/' );
+		if ( workflowName && selectedTasks.length > 0 ) {
+			dispatch( createWorkflow( workflowName, selectedTasks ) );
+			page( '/' );
+		}
 	};
 
 	const handleCancel = () => {

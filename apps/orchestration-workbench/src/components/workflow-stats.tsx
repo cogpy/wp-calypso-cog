@@ -1,30 +1,33 @@
 import { Card, CardBody } from '@wordpress/components';
 import { useTranslate } from 'i18n-calypso';
+import { useSelector } from 'react-redux';
+import { getWorkflowStats } from '../state/workflows/selectors';
 
 import './workflow-stats.scss';
 
 export function WorkflowStats() {
 	const translate = useTranslate();
+	const workflowStats = useSelector( getWorkflowStats );
 
 	const stats = [
 		{
 			label: translate( 'Active Workflows' ),
-			value: 0,
+			value: workflowStats.activeWorkflows,
 			color: 'primary',
 		},
 		{
 			label: translate( 'Completed Tasks' ),
-			value: 0,
+			value: workflowStats.completedTasks,
 			color: 'success',
 		},
 		{
 			label: translate( 'Pending Tasks' ),
-			value: 0,
+			value: workflowStats.pendingTasks,
 			color: 'warning',
 		},
 		{
 			label: translate( 'Failed Tasks' ),
-			value: 0,
+			value: workflowStats.failedTasks,
 			color: 'error',
 		},
 	];
