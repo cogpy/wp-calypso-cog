@@ -1,0 +1,38 @@
+.workflow-list {
+	min-height: 300px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.workflow-list__empty {
+	text-align: center;
+	padding: 48px 24px;
+	max-width: 500px;
+}
+
+.workflow-list__empty-icon {
+	color: var( --color-accent-30 );
+	margin-block-end: 24px;
+	display: flex;
+	justify-content: center;
+
+	svg {
+		width: 64px;
+		height: 64px;
+	}
+}
+
+.workflow-list__empty-title {
+	font-size: 20px;
+	font-weight: 600;
+	margin-block-end: 12px;
+	color: var( --color-accent );
+}
+
+.workflow-list__empty-description {
+	font-size: 14px;
+	color: var( --color-accent-60 );
+	margin-block-end: 24px;
+	line-height: 1.5;
+}
