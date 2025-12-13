@@ -1,0 +1,126 @@
+.workflow-canvas {
+	min-height: 600px;
+}
+
+.workflow-canvas__header {
+	margin-block-end: 32px;
+}
+
+.workflow-canvas__name-input {
+	max-width: 500px;
+
+	input {
+		font-size: 16px;
+		font-weight: 600;
+	}
+}
+
+.workflow-canvas__content {
+	min-height: 500px;
+}
+
+.workflow-canvas__empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 80px 24px;
+	text-align: center;
+}
+
+.workflow-canvas__empty-icon {
+	color: var( --color-accent-20 );
+	margin-block-end: 24px;
+
+	svg {
+		width: 80px;
+		height: 80px;
+	}
+}
+
+.workflow-canvas__empty-title {
+	font-size: 20px;
+	font-weight: 600;
+	margin-block-end: 12px;
+	color: var( --color-accent );
+}
+
+.workflow-canvas__empty-description {
+	font-size: 14px;
+	color: var( --color-accent-60 );
+	max-width: 400px;
+	line-height: 1.5;
+}
+
+.workflow-canvas__tasks {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+.workflow-canvas__task {
+	display: flex;
+	gap: 16px;
+	padding: 20px;
+	border: 2px solid var( --color-neutral-20 );
+	border-radius: 12px;
+	background: var( --color-neutral-0 );
+	align-items: center;
+	position: relative;
+	transition: all 0.2s ease;
+
+	&:hover {
+		border-color: var( --color-primary-30 );
+		box-shadow: 0 4px 8px rgba( 0, 0, 0, 0.08 );
+		transform: translateY( -2px );
+	}
+}
+
+.workflow-canvas__task-number {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background: var( --color-primary-50 );
+	color: var( --color-neutral-0 );
+	font-weight: 700;
+	font-size: 14px;
+	flex-shrink: 0;
+}
+
+.workflow-canvas__task-icon {
+	font-size: 32px;
+	flex-shrink: 0;
+}
+
+.workflow-canvas__task-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.workflow-canvas__task-name {
+	font-size: 16px;
+	font-weight: 600;
+	color: var( --color-accent );
+	margin-block-end: 4px;
+}
+
+.workflow-canvas__task-description {
+	font-size: 14px;
+	color: var( --color-accent-60 );
+	line-height: 1.4;
+}
+
+.workflow-canvas__connector {
+	display: flex;
+	justify-content: center;
+	padding: 8px 0;
+	color: var( --color-accent-30 );
+
+	svg {
+		width: 24px;
+		height: 24px;
+	}
+}

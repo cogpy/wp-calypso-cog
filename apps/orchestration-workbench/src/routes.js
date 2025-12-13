@@ -3,6 +3,7 @@ import { createElement } from '@wordpress/element';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { Dashboard } from './pages/dashboard';
+import { WorkflowBuilder } from './pages/workflow-builder';
 
 export default function registerOrchestrationWorkbenchPages( store, queryClient ) {
 	const rootElement = document.getElementById( 'wpcom' );
@@ -16,6 +17,10 @@ export default function registerOrchestrationWorkbenchPages( store, queryClient 
 
 	page( '/', () => {
 		render( createElement( Dashboard ) );
+	} );
+
+	page( '/builder', () => {
+		render( createElement( WorkflowBuilder ) );
 	} );
 
 	page();

@@ -1,10 +1,15 @@
 import { Button } from '@wordpress/components';
+import page from '@automattic/calypso-router';
 import { useTranslate } from 'i18n-calypso';
 
 import './workflow-list.scss';
 
 export function WorkflowList() {
 	const translate = useTranslate();
+
+	const handleCreateWorkflow = () => {
+		page( '/builder' );
+	};
 
 	return (
 		<div className="workflow-list">
@@ -47,7 +52,7 @@ export function WorkflowList() {
 				<p className="workflow-list__empty-description">
 					{ translate( 'Get started by creating your first autonomous workflow to automate tasks across your WordPress sites.' ) }
 				</p>
-				<Button variant="primary" size="default">
+				<Button variant="primary" size="default" onClick={ handleCreateWorkflow }>
 					{ translate( 'Create Workflow' ) }
 				</Button>
 			</div>
