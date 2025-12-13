@@ -74,7 +74,7 @@ export function WorkflowCanvas( {
 				) : (
 					<div className="workflow-canvas__tasks">
 						{ tasks.map( ( task, index ) => (
-							<div key={ `${ task.id }-${ index }` }>
+							<div key={ task.id }>
 								<div className="workflow-canvas__task">
 									<div className="workflow-canvas__task-number">{ index + 1 }</div>
 									<div className="workflow-canvas__task-icon">{ task.icon }</div>

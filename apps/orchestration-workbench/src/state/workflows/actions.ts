@@ -44,7 +44,7 @@ export type WorkflowAction =
 export function createWorkflow( name: string, tasks: Task[] ): CreateWorkflowAction {
 	const now = new Date().toISOString();
 	const workflow: Workflow = {
-		id: `workflow-${ Date.now() }`,
+		id: `workflow-${ crypto.randomUUID() }`,
 		name,
 		tasks,
 		status: 'draft',

@@ -30,16 +30,6 @@ const browserslistEnv = process.env.BROWSERSLIST_ENV || defaultBrowserslistEnv;
 const extraPath = browserslistEnv === 'defaults' ? 'fallback' : browserslistEnv;
 const cachePath = path.resolve( '.cache', extraPath );
 
-const excludedPackages = [];
-
-const excludedPackagePlugins = excludedPackages.map(
-	( pkg ) =>
-		new webpack.NormalModuleReplacementPlugin(
-			pkg,
-			path.resolve( __dirname, 'src/components/nothing' )
-		)
-);
-
 module.exports = {
 	bail: ! isDevelopment,
 	entry: {
@@ -164,7 +154,6 @@ module.exports = {
 		new webpack.NormalModuleReplacementPlugin( /^path$/, 'path-browserify' ),
 		new webpack.NormalModuleReplacementPlugin( /^\.\.\/gridicon$/, '../gridicon/no-asset' ),
 		new webpack.NormalModuleReplacementPlugin( /^\.\/gridicon$/, './gridicon/no-asset' ),
-		...excludedPackagePlugins,
 		shouldEmitStats &&
 			new BundleAnalyzerPlugin( {
 				analyzerMode: 'server',
