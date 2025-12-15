@@ -1,0 +1,37 @@
+.orchestration-workbench-dashboard {
+	padding: 24px;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.orchestration-workbench-dashboard__header {
+	margin-block-end: 32px;
+}
+
+.orchestration-workbench-dashboard__title {
+	font-size: 32px;
+	font-weight: 600;
+	margin-block-end: 8px;
+	color: var( --color-accent );
+}
+
+.orchestration-workbench-dashboard__description {
+	font-size: 16px;
+	color: var( --color-accent-60 );
+	margin: 0;
+}
+
+.orchestration-workbench-dashboard__workflows {
+	margin-block-start: 24px;
+}
+
+.orchestration-workbench-dashboard__workflows-header {
+	margin-block-end: 16px;
+
+	h2 {
+		font-size: 20px;
+		font-weight: 600;
+		margin: 0;
+		color: var( --color-accent );
+	}
+}

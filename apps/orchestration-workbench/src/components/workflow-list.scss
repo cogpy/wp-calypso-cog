@@ -1,0 +1,118 @@
+.workflow-list {
+	min-height: 300px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.workflow-list__empty {
+	text-align: center;
+	padding: 48px 24px;
+	max-width: 500px;
+}
+
+.workflow-list__empty-icon {
+	color: var( --color-accent-30 );
+	margin-block-end: 24px;
+	display: flex;
+	justify-content: center;
+
+	svg {
+		width: 64px;
+		height: 64px;
+	}
+}
+
+.workflow-list__empty-title {
+	font-size: 20px;
+	font-weight: 600;
+	margin-block-end: 12px;
+	color: var( --color-accent );
+}
+
+.workflow-list__empty-description {
+	font-size: 14px;
+	color: var( --color-accent-60 );
+	margin-block-end: 24px;
+	line-height: 1.5;
+}
+
+.workflow-list__items {
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( 300px, 1fr ) );
+	gap: 16px;
+}
+
+.workflow-list__item {
+	padding: 20px;
+	border: 1px solid var( --color-neutral-20 );
+	border-radius: 8px;
+	background: var( --color-neutral-0 );
+	transition: all 0.2s ease;
+
+	&:hover {
+		border-color: var( --color-primary-30 );
+		box-shadow: 0 2px 8px rgba( 0, 0, 0, 0.08 );
+		transform: translateY( -2px );
+	}
+}
+
+.workflow-list__item-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-block-end: 12px;
+}
+
+.workflow-list__item-name {
+	font-size: 16px;
+	font-weight: 600;
+	margin: 0;
+	color: var( --color-accent );
+	flex: 1;
+}
+
+.workflow-list__item-status {
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 12px;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.workflow-list__item-status--active {
+	background: var( --studio-green-5 );
+	color: var( --studio-green-70 );
+}
+
+.workflow-list__item-status--paused {
+	background: var( --studio-orange-5 );
+	color: var( --studio-orange-70 );
+}
+
+.workflow-list__item-status--draft {
+	background: var( --color-neutral-10 );
+	color: var( --color-accent-60 );
+}
+
+.workflow-list__item-tasks {
+	font-size: 14px;
+	color: var( --color-accent-60 );
+	margin-block-end: 12px;
+}
+
+.workflow-list__item-stats {
+	display: flex;
+	gap: 16px;
+	font-size: 13px;
+}
+
+.workflow-list__item-stat {
+	color: var( --studio-green-60 );
+	font-weight: 500;
+}
+
+.workflow-list__item-stat--error {
+	color: var( --studio-red-60 );
+}

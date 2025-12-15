@@ -1,0 +1,22 @@
+// Color palette
+:root {
+	--color-neutral-0: #fff;
+	--color-neutral-5: #f9f9f9;
+	--color-neutral-10: #f3f3f3;
+	--color-neutral-20: #e0e0e0;
+	--color-neutral-50: #8c8f94;
+	--color-neutral-70: #50575e;
+	--color-neutral-100: #1d2327;
+}
+
+// Spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+// Border radius
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
