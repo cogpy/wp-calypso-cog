@@ -9,9 +9,9 @@ import type {
   EvolutionConfig,
 } from '../types';
 import { calculateNovelty, shuffle } from '../utils';
-import { initializeOntogeneticKernel, updateDevelopmentStage } from './initialization';
-import { selfOptimize } from './optimization';
-import { crossover, mutate } from './reproduction';
+import { initializeOntogeneticKernel, updateDevelopmentStage } from '../operations/initialization';
+import { selfOptimize } from '../operations/optimization';
+import { crossover, mutate } from '../operations/reproduction';
 
 /**
  * Run the ontogenesis evolution process
@@ -40,7 +40,7 @@ export function runOntogenesis(config: OntogenesisConfig): GenerationStats[] {
 
     // Check if threshold reached
     if (stats.bestFitness >= config.evolution.fitnessThreshold) {
-      console.log(`Fitness threshold reached at generation ${gen}`);
+      // Fitness threshold reached
       break;
     }
 
