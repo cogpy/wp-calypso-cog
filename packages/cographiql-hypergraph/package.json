@@ -1,0 +1,29 @@
+{
+  "name": "cographiql-hypergraph",
+  "version": "1.0.0",
+  "description": "Self-generating, evolving kernels through recursive application of differential operators",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "keywords": [
+    "ontogenesis",
+    "kernel",
+    "differential-operators",
+    "b-series",
+    "evolution",
+    "genetic-algorithms"
+  ],
+  "author": "Automattic Inc.",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.0.0",
+    "@types/node": "^18.0.0",
+    "jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {}
+}
